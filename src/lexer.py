@@ -51,12 +51,12 @@ class lexman():
             elif (isNewLine(t)):
                 G.LINE_NUMBER += 1
 
-            elif (t.isdigit(t)):
+            elif (t.isdigit()):
                 ungetchar(t)
                 print(f't : {t}')
                 return G.NUM
 
-            elif (t.isalpha):
+            elif (t.isalpha()):
                 p = b = 0
                 while (t.isalnum):
                     lexbuf[b] = t
@@ -85,3 +85,7 @@ class lexman():
             else:
                 G.TOKEN_VALUE = G.NONE
                 return t
+
+if (__name__ == "__main__"):
+    l = lexman()
+    l.lex()

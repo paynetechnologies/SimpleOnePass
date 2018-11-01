@@ -1,5 +1,5 @@
 import sys
-import universal as U
+import globall as G
 
 def error(m):
     print(f'line {G.LINE_NUMBER} : {m} ')
