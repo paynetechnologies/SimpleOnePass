@@ -1,8 +1,8 @@
 import unittest
 import universal as U
 
-class TestGlobal(unittest.TestCase):
-    """ Test global variables """
+class TestLexer(unittest.TestCase):
+    """ Test lexer variables """
     
     def test_01_create_entry(self):
         e = U.Entry("lexptr",0)
