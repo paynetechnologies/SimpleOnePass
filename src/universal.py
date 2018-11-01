@@ -21,6 +21,6 @@ MOD     = 258
 ID      = 259
 DONE    = 260
 
-Token_Value = 0
-Line_No   = 0
-Symbol_Table = []
+token_value = 0
+line_nbr   = 0
+symbol_table = []
