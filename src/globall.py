@@ -13,10 +13,9 @@ LINE_NUMBER   = 0
 SYMBOL_TABLE = []
 TOKEN_VALUE = 0
 
-class Entry(object):
+class Entry:
     """ a symbol table enry """
-
     def __init__(self, lex, value):
-        self.lexptr = lex
+        self.lex = lex
         self.token = value
 
