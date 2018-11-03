@@ -1,7 +1,7 @@
 import unittest
 import globall as G
 
-class TestLexer(unittest.TestCase):
+class Test_Lexer(unittest.TestCase):
     """ Test lexer variables """
     
     def test_01_create_entry(self):
