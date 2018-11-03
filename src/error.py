@@ -1,6 +1,6 @@
 import sys
-import globall as G
+import globals
 
 def error(m):
-    print(f'line {G.LINE_NUMBER} : {m} ')
+    print(f'line {globals.LINE_NUMBER} : {m} ')
     sys.exit()

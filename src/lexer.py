@@ -1,92 +1,85 @@
 import sys
 import error
 import symbol
-import globall as G
+import globals
 
-G.LINE_NUMBER = 1
-G.TOKEN_VALUE = None
-
-inputString = "9+5-2;" 
-lookahead = ""
-ptr = 0
-EOF = False
-lexbuf = [None] * G.BSIZE
-
-
-def getchar():
-    global ptr
-
-    c = inputString[ptr]
-    if (c == ';'):
-        G.EOF = True
-    ptr += 1
-    return c
-
-def ungetchar(c):
-    global ptr
-    ptr -= 1
-
-def isNewLine(t):
-    if (t == "\n"):
-        return True
-    return False
-
-def isWhiteSpace(t):
-    if (t == "" or t =="\t"):
-        return True
-    return False
+globals.LINE_NUMBER = 1
+globals.TOKEN_VALUE = None
 
 class lexman(object):
 
     def __init__(self, inputStr):
         self.inputString = inputStr
+        self.lookahead = ""
+        self.ptr = 0
+        self.EOF = False
+        self.lexbuf = [None] * globals.BSIZE
+
+    def getchar(self):
+        c = self.inputString[self.ptr]
+        if (c == ';'):
+            globals.EOF = True
+        self.ptr += 1
+        return c
+
+    def ungetchar(self):
+        self.ptr -= 1
+
+    def isNewLine(self, t):
+        if (t == "\n"):
+            return True
+        return False
+
+    def isWhiteSpace(self, t):
+        if (t == "" or t =="\t"):
+            return True
+        return False
 
     def lex(self):
         t=""
         while(True):
-            t = getchar()
+            t = self.getchar()
 
-            if (isWhiteSpace(t)):
+            if (self.isWhiteSpace(t)):
                 pass
 
-            elif (isNewLine(t)):
-                G.LINE_NUMBER += 1
+            elif (self.isNewLine(t)):
+                globals.LINE_NUMBER += 1
 
             elif (t.isdigit()):
-                ungetchar(t)
+                self.ungetchar()
                 print(f't : {t}')
-                return G.NUM
+                return globals.NUM
 
             elif (t.isalpha()):
                 p = b = 0
-                while (t.isalnum):
-                    lexbuf[b] = t
-                    t = getchar()
+                while (t.isalnum()):
+                    self.lexbuf[b] = t
+                    t = self.getchar()
                     b += 1
-                    if (b >= G.BSIZE):
-                        pass
-                        # error("compiler error")
+                    if (b >= globals.BSIZE):
+                        error.error("compiler error")
 
-                lexbuf[b] = G.EOS
+                self.lexbuf[b] = globals.EOS
 
-                if (t != EOF):
-                    ungetchar(t)
+                if (t != self.EOF):
+                    self.ungetchar()
                 
-                p = symbol.lookup(lexbuf)
+                p = symbol.lookup(self.lexbuf)
                 
-                if (p == 0):
-                    p = symbol.insert(lexbuf, G.ID)
-                G.TOKEN_VALUE = p
+                if (p == None):
+                    p = symbol.insert(self.lexbuf, globals.ID)
+                globals.TOKEN_VALUE = p
                 
-                return G.SYMBOL_TABLE[p].token
+                return globals.SYMBOL_TABLE[p].token
             
-            elif (t == EOF):
-                return G.DONE
+            elif (t == self.EOF):
+                return globals.DONE
 
             else:
-                G.TOKEN_VALUE = G.NONE
+                globals.TOKEN_VALUE = globals.NONE
                 return t
 
 if (__name__ == "__main__"):
-    l = lexman()
+    l = lexman("A + B = C;")
     l.lex()

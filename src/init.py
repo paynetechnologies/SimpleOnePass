@@ -1,10 +1,10 @@
 import sys
 import error
-import globall as G
+import globals
 from symbol import insert
 
 keywords = {'div' : 'DIV', 'mod' : 'MOD'}
 
 def init():
     '''Loads keywords into SYMBOL_TABLE'''
-    G.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords)
+    globals.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords)
