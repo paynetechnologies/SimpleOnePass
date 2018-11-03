@@ -1,9 +1,10 @@
 import sys
 import error
+import symbol
 import globall as G
 
 G.LINE_NUMBER = 1
-G.token_value = None
+G.TOKEN_VALUE = None
 
 inputString = "9+5-2;" 
 lookahead = ""
@@ -35,10 +36,10 @@ def isWhiteSpace(t):
         return True
     return False
 
-class lexman():
+class lexman(object):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inputStr):
+        self.inputString = inputStr
 
     def lex(self):
         t=""
@@ -71,13 +72,13 @@ class lexman():
                 if (t != EOF):
                     ungetchar(t)
                 
-                # p = lookup(lexbuf)
+                p = symbol.lookup(lexbuf)
                 
-                # if (p == 0):
-                #     p = insert(lexbuf, ID)
-                # G.TOKEN_VALUE = p
+                if (p == 0):
+                    p = symbol.insert(lexbuf, G.ID)
+                G.TOKEN_VALUE = p
                 
-                # return SYMBOL_TABLE[p].token
+                return G.SYMBOL_TABLE[p].token
             
             elif (t == EOF):
                 return G.DONE
