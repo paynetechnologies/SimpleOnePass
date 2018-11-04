@@ -1,6 +1,6 @@
 import sys
 import error
-import globals
+from src.globals import constants, entry
 
 STRMAX = 999 # size of lexeme list
 SYMMAX = 100 # size of symbol table
@@ -8,7 +8,7 @@ SYMMAX = 100 # size of symbol table
 lexemes = ['' for i in range(STRMAX)]
 last_char = -1 # last used position in lexemes
 
-#globals.SYMBOL_TABLE = [globals.Entry() for i in range(STRMAX)]
+#constants.SYMBOL_TABLE = [constants.Entry() for i in range(STRMAX)]
 last_entry = -1 # last used position in symtable
 
 def lookup(s):
@@ -17,7 +17,7 @@ def lookup(s):
     # p = 0
 
     #for (p = last_entry; p > 0 ; p -= 1):
-    for indx, entry in reversed(list(enumerate(globals.SYMBOL_TABLE))):
+    for indx, entry in reversed(list(enumerate(constants.SYMBOL_TABLE))):
         print (f'indx : {indx} - entry {entry}')
         if (s == entry):
             return indx
@@ -35,9 +35,9 @@ def insert(s, tok):
     
     last_entry += 1
     
-    entry = globals.Entry(s,tok)
+    entry = constants.Entry(s,tok)
 
-    globals.SYMBOL_TABLE.insert(last_entry,entry)
+    constants.SYMBOL_TABLE.insert(last_entry,entry)
 
     return last_entry
 

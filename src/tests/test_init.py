@@ -1,5 +1,5 @@
 import unittest
-import globals
+from src.globals import constants, entry
 import symbol
 
 class Test_init(unittest.TestCase):
@@ -8,20 +8,20 @@ class Test_init(unittest.TestCase):
     def test_init(self):
         keywords = {'div' : 'DIV', 'mod' : 'MOD'}
         '''Loads keywords into SYMBOL_TABLE'''
-        #globals.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
+        #constants.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
         #dict_variable = {key:value for (key,value) in dictonary.items()}
         print(f'TOK : {tok} - LEX : {lex}' for (tok, lex) in keywords)        
         
-        for sym in globals.SYMBOL_TABLE:
+        for sym in constants.SYMBOL_TABLE:
             print(f'TOK : {sym.token} - LEX : {sym.lex}')
             assert("unknown")
 
 def init():
     '''Loads keywords into SYMBOL_TABLE'''
     keywords = {'div' : 'DIV', 'mod' : 'MOD'}
-    globals.SYMBOL_TABLE = {symbol.insert(k, v) for k,v in keywords.items()}
+    constants.SYMBOL_TABLE = {symbol.insert(k, v) for k,v in keywords.items()}
 
-    #globals.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
+    #constants.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
     #dict_variable = {key:value for (key,value) in dictonary.items()}
     for (k,v) in keywords.items():
         print (f'k {k} - v {v}')    
@@ -32,7 +32,7 @@ def init():
 
     #print(f' LEX : {l} - TOK : {t} ') 
     
-    # for sym in globals.SYMBOL_TABLE:
+    # for sym in constants.SYMBOL_TABLE:
     #     print(f'TOK : {sym.token} - LEX : {sym.lex}')
     #     assert("unknown")
 

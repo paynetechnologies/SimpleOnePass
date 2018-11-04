@@ -1,10 +1,10 @@
 import sys
 import error
 import symbol
-import globals
+from src.globals import constants, entry
 
-globals.LINE_NUMBER = 1
-globals.TOKEN_VALUE = None
+constants.LINE_NUMBER = 1
+constants.TOKEN_VALUE = None
 
 class lexman(object):
 
@@ -13,12 +13,13 @@ class lexman(object):
         self.lookahead = ""
         self.ptr = 0
         self.EOF = False
-        self.lexbuf = [None] * globals.BSIZE
+        self.lexbuf = [None] * constants.BSIZE
+        self.p = self.b = -1
 
     def getchar(self):
         c = self.inputString[self.ptr]
         if (c == ';'):
-            globals.EOF = True
+            constants.EOF = True
         self.ptr += 1
         return c
 
@@ -44,23 +45,40 @@ class lexman(object):
                 pass
 
             elif (self.isNewLine(t)):
-                globals.LINE_NUMBER += 1
-
+                constants.LINE_NUMBER += 1
+                      
             elif (t.isdigit()):
-                self.ungetchar()
-                print(f't : {t}')
-                return globals.NUM
+                constants.TOKEN_VALUE = int(t) - 0
+                t = self.getchar()
+                while(t.isdigit()):
+                    constants.TOKEN_VALUE = constants.TOKEN_VALUE * 10 + int(t) - 0
+                    t = self.getchar()
+
+                if (t != self.EOF):
+                    self.ungetchar()                    
+            
+                self.b += 1
+                if (self.b >= constants.BSIZE):
+                    error.error("compiler error")
+
+                self.lexbuf[self.b] = constants.TOKEN_VALUE
+                
+                self.b += 1
+                self.lexbuf[self.b] = constants.EOS
+
+                print(f'isdigit : {self.lexbuf[self.b-1]}')
+                return constants.NUM
 
             elif (t.isalpha()):
-                p = b = 0
                 while (t.isalnum()):
-                    self.lexbuf[b] = t
+                    self.b += 1
+                    self.lexbuf[self.b] = t
                     t = self.getchar()
-                    b += 1
-                    if (b >= globals.BSIZE):
+                    self.b += 1
+                    if (self.b >= constants.BSIZE):
                         error.error("compiler error")
 
-                self.lexbuf[b] = globals.EOS
+                self.lexbuf[self.b] = constants.EOS
 
                 if (t != self.EOF):
                     self.ungetchar()
@@ -68,18 +86,18 @@ class lexman(object):
                 p = symbol.lookup(self.lexbuf)
                 
                 if (p == None):
-                    p = symbol.insert(self.lexbuf, globals.ID)
-                globals.TOKEN_VALUE = p
+                    p = symbol.insert(self.lexbuf, constants.ID)
+                constants.TOKEN_VALUE = p
                 
-                return globals.SYMBOL_TABLE[p].token
+                return constants.SYMBOL_TABLE[p].token
             
             elif (t == self.EOF):
-                return globals.DONE
+                return constants.DONE
 
             else:
-                globals.TOKEN_VALUE = globals.NONE
+                constants.TOKEN_VALUE = constants.NONE
                 return t
 
 if (__name__ == "__main__"):
-    l = lexman("A + B = C;")
+    l = lexman("12345 + 5 - 2;")
     l.lex()

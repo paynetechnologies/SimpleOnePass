@@ -1,6 +1,6 @@
 import sys
-import globals
+from src.globals import constants, entry
 
-def error(m):
-    print(f'line {globals.LINE_NUMBER} : {m} ')
+def error(self, m):
+    print(f'line {constants.LINE_NUMBER} : {m} ')
     sys.exit()

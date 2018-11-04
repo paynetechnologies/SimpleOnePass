@@ -1,4 +1,4 @@
 import sys
 import error
-import globals
+from src.globals import constants, entry
 
