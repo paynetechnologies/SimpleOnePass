@@ -1,5 +1,5 @@
 import unittest
-from src.globals import constants, entry
+from src.constants import constants, entry
 import symbol
 
 class Test_init(unittest.TestCase):

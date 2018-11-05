@@ -1,5 +1,5 @@
 import unittest
-from src.globals import constants, entry
+from constants import constants, entry
 
 class postfixTest(unittest.TestCase):
 

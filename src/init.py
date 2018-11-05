@@ -1,6 +1,6 @@
 import sys
 import error
-from src.globals import constants, entry
+from constants import constants, entry
 from symbol import insert
 
 keywords = {'div' : 'DIV', 'mod' : 'MOD'}

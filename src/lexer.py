@@ -1,23 +1,28 @@
 import sys
 import error
 import symbol
-from src.globals import constants, entry
+from constants import constants, entry
 
 constants.LINE_NUMBER = 1
 constants.TOKEN_VALUE = None
 
-class lexman(object):
+inputBuffer = ""
 
-    def __init__(self, inputStr):
-        self.inputString = inputStr
+class lex_manager(object):
+
+    def __init__(self):
+        #self.inputBuffer = inputBfr
         self.lookahead = ""
         self.ptr = 0
-        self.EOF = False
+        self.EOF = ';'
         self.lexbuf = [None] * constants.BSIZE
         self.p = self.b = -1
 
+    def loadBuffer(self, input):
+        self.inputBuffer = input
+
     def getchar(self):
-        c = self.inputString[self.ptr]
+        c = self.inputBuffer[self.ptr]
         if (c == ';'):
             constants.EOF = True
         self.ptr += 1
@@ -32,20 +37,21 @@ class lexman(object):
         return False
 
     def isWhiteSpace(self, t):
-        if (t == "" or t =="\t"):
+        if (t == " " or t =="\t"):
             return True
         return False
 
-    def lex(self):
+    def lex_analysis(self):
         t=""
         while(True):
             t = self.getchar()
 
             if (self.isWhiteSpace(t)):
-                pass
+                return constants.WHITESPACE
 
             elif (self.isNewLine(t)):
                 constants.LINE_NUMBER += 1
+                return constants.NEWLINE
                       
             elif (t.isdigit()):
                 constants.TOKEN_VALUE = int(t) - 0
@@ -59,7 +65,7 @@ class lexman(object):
             
                 self.b += 1
                 if (self.b >= constants.BSIZE):
-                    error.error("compiler error")
+                    error("compiler error")
 
                 self.lexbuf[self.b] = constants.TOKEN_VALUE
                 
@@ -76,7 +82,7 @@ class lexman(object):
                     t = self.getchar()
                     self.b += 1
                     if (self.b >= constants.BSIZE):
-                        error.error("compiler error")
+                        error("compiler error")
 
                 self.lexbuf[self.b] = constants.EOS
 
@@ -99,5 +105,6 @@ class lexman(object):
                 return t
 
 if (__name__ == "__main__"):
-    l = lexman("12345 + 5 - 2;")
-    l.lex()
+    l = lex_manager()
+    l.loadBuffer("   a")
+    l.lex_analysis()

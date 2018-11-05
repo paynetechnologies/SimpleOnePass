@@ -9,10 +9,12 @@ class constants:
     ID      = 259
     LINE_NUMBER   = 0
     MOD     = 258
+    NEWLINE = 998
     NONE    = -1
     NUM     = 255
     SYMBOL_TABLE = []
     TOKEN_VALUE = 0
+    WHITESPACE = 999
 
 class entry:
     """ a symbol table enry """
