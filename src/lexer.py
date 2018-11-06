@@ -89,11 +89,12 @@ class lex_manager(object):
 
                 if (t != self.EOF):
                     self.ungetchar()
-                
-                p = lookup(self.lexbuf)
-                
+                # create string from slice of list
+                lexeme = ''.join(self.lexbuf[:self.b])
+                p = lookup(lexeme)
+
                 if (p == None):
-                    p = insert(self.lexbuf[:4], constants.ID)
+                    p = insert(lexeme, constants.ID)
                 constants.TOKEN_VALUE = p
                 
                 return constants.SYMBOL_TABLE[p].token
