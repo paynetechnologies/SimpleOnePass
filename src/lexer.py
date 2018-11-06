@@ -1,4 +1,5 @@
 import sys
+import array as arr
 import src.error
 from src.symbol_table import lookup, insert
 from src.constants import constants, entry
