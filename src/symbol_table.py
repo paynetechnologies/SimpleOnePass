@@ -1,6 +1,6 @@
 import sys
-import error
-from constants import constants, entry
+import src.error
+from src.constants import constants, entry
 
 STRMAX = 999 # size of lexeme list
 SYMMAX = 100 # size of symbol table
@@ -25,7 +25,7 @@ def lookup(s):
     
 def insert(s, tok):
     global last_entry
-    l = len(s)
+    l = len(s[0])
     
     if (last_entry + 1 >= SYMMAX):
         error("Symbol Table Full")
@@ -35,7 +35,7 @@ def insert(s, tok):
     
     last_entry += 1
     
-    entry = constants.Entry(s,tok)
+    entry = constants.entry(s,tok)
 
     constants.SYMBOL_TABLE.insert(last_entry,entry)
 
