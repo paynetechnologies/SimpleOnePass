@@ -1,6 +1,7 @@
 import unittest
 from src.constants import constants, entry
 from src.lexer import lex_manager
+from src.init import init_symbol_table
 
 '''
 Newline
@@ -18,6 +19,7 @@ class Test_Lexer(unittest.TestCase):
     """ Test lexer variables """
 
     def setUp(self):
+        init_symbol_table()
         self.lex = lex_manager()
         self.assertIsNotNone(self.lex)
 
