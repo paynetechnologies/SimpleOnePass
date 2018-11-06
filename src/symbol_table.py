@@ -18,10 +18,10 @@ def lookup(s):
 
     #for (p = last_entry; p > 0 ; p -= 1):
     for indx, entry in reversed(list(enumerate(constants.SYMBOL_TABLE))):
-        print (f'indx : {indx} - entry {entry}')
-        if (s == entry):
+        if (s == entry.token):
+            print (f'indx : {indx} - entry {entry.lex, entry.token}')
             return indx
-        return 0
+    return 0
     
 def insert(s, tok):
     global last_entry
