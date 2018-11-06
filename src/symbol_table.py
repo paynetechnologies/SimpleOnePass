@@ -25,7 +25,7 @@ def lookup(s):
     
 def insert(s, tok):
     global last_entry
-    l = len(s[0])
+    l = len(s)
     
     if (last_entry + 1 >= SYMMAX):
         error("Symbol Table Full")
@@ -35,9 +35,9 @@ def insert(s, tok):
     
     last_entry += 1
     
-    entry = constants.entry(s,tok)
+    new_entry = entry(s,tok)
 
-    constants.SYMBOL_TABLE.insert(last_entry,entry)
+    constants.SYMBOL_TABLE.insert(last_entry, new_entry)
 
     return last_entry
 
