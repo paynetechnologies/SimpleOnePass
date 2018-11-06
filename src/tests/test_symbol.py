@@ -5,7 +5,7 @@ class Test_Symbol_Table(unittest.TestCase):
     """ Test Symbol_Table variables """
     
     def setUp(self):
-        self.e = constants.Entry("lex",0)
+        self.e = entry("lex",0)
 
     def tearDown(self):
         return super().tearDown()
