@@ -1,6 +1,6 @@
 import sys
 import src.error
-import src.symbol_table
+from src.symbol_table import lookup, insert
 from src.constants import constants, entry
 
 constants.LINE_NUMBER = 1
@@ -89,16 +89,19 @@ class lex_manager(object):
                 if (t != self.EOF):
                     self.ungetchar()
                 
-                p = src.symbol_table.lookup(self.lexbuf)
+                p = lookup(self.lexbuf)
                 
                 if (p == None):
-                    p = src.symbol_table.insert(self.lexbuf, constants.ID)
+                    p = insert(self.lexbuf[:4], constants.ID)
                 constants.TOKEN_VALUE = p
                 
                 return constants.SYMBOL_TABLE[p].token
             
             elif (t == self.EOF):
                 return constants.DONE
+
+            elif ( t in ["DIV", "MOD", "+", "-", "*", "/"] ):
+                return constants.OPERATOR
 
             else:
                 constants.TOKEN_VALUE = constants.NONE
