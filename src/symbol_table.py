@@ -21,7 +21,7 @@ def lookup(s):
         if (s == entry.token):
             print (f'indx : {indx} - entry {entry.lex, entry.token}')
             return indx
-    return 0
+    return None
     
 def insert(s, tok):
     global last_entry

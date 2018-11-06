@@ -1,7 +1,7 @@
 import unittest
 from src.constants import constants, entry
 from src.lexer import lex_manager
-from src.init import init_symbol_table
+from src.init import init_symbol_table, clear_symbol_table
 
 '''
 Newline
@@ -17,14 +17,26 @@ EOF ;
 
 class Test_Lexer(unittest.TestCase):
     """ Test lexer variables """
+    
+    @classmethod
+    def setUpClass(cls):
+        init_symbol_table()
+
+    @classmethod
+    def tearDownClass(cls):
+        clear_symbol_table()
 
     def setUp(self):
-        init_symbol_table()
+        #init_symbol_table()
         self.lex = lex_manager()
         self.assertIsNotNone(self.lex)
 
-    def tearDown(self):
-        return super().tearDown()
+    # def tearDown(self):
+    #     return super().tearDown()
+
+    # def test_00_setup_lex_manager(self):
+    #     self.lex = lex_manager()
+    #     self.assertIsNotNone(self.lex)
 
     def test_01_newline(self):
         self.lex.loadBuffer('\n;')
