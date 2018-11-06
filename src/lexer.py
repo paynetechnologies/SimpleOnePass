@@ -1,7 +1,7 @@
 import sys
-import error
-import symbol
-from constants import constants, entry
+import src.error
+import src.symbol_table
+from src.constants import constants, entry
 
 constants.LINE_NUMBER = 1
 constants.TOKEN_VALUE = None
@@ -47,11 +47,11 @@ class lex_manager(object):
             t = self.getchar()
 
             if (self.isWhiteSpace(t)):
-                return constants.WHITESPACE
+                constants.TOKEN_VALUE = constants.WHITESPACE
 
             elif (self.isNewLine(t)):
                 constants.LINE_NUMBER += 1
-                return constants.NEWLINE
+                constants.TOKEN_VALUE = constants.NEWLINE
                       
             elif (t.isdigit()):
                 constants.TOKEN_VALUE = int(t) - 0
@@ -76,8 +76,8 @@ class lex_manager(object):
                 return constants.NUM
 
             elif (t.isalpha()):
+                self.b = 0
                 while (t.isalnum()):
-                    self.b += 1
                     self.lexbuf[self.b] = t
                     t = self.getchar()
                     self.b += 1
@@ -89,10 +89,10 @@ class lex_manager(object):
                 if (t != self.EOF):
                     self.ungetchar()
                 
-                p = symbol.lookup(self.lexbuf)
+                p = src.symbol_table.lookup(self.lexbuf)
                 
                 if (p == None):
-                    p = symbol.insert(self.lexbuf, constants.ID)
+                    p = src.symbol_table.insert(self.lexbuf, constants.ID)
                 constants.TOKEN_VALUE = p
                 
                 return constants.SYMBOL_TABLE[p].token

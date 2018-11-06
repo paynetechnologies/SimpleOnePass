@@ -1,6 +1,6 @@
 import unittest
-from constants import constants, entry
-from lexer import lex_manager
+from src.constants import constants, entry
+from src.lexer import lex_manager
 
 '''
 Newline
@@ -25,43 +25,36 @@ class Test_Lexer(unittest.TestCase):
         return super().tearDown()
 
     def test_01_newline(self):
-        '''\n 
-        abcd
-        ;
-        '''
-        self.lex.loadBuffer('''\n 
-        abcd
-        ;
-        ''')
+        self.lex.loadBuffer('\n abcd ;')
         token = self.lex.lex_analysis()
         self.assertEqual(constants.NEWLINE, token)
 
     def test_02_White_Space(self):
         # '   abc ;'
-        self.lex.loadBuffer('   abc ;')
+        self.lex.loadBuffer(' abc ;')
         token = self.lex.lex_analysis()
         self.assertEqual(constants.WHITESPACE, token)
 
     def test_03_Single_Digit(self):
         # ' 1 ;'
-        self.lex.loadBuffer(' 1 ;')
+        self.lex.loadBuffer('1 abc ;')
         token = self.lex.lex_analysis()
 
     def test_04_Multiple_Digits(self):
         # ' 123 ;'
-        self.lex.loadBuffer(' 123 ;')
+        self.lex.loadBuffer('123 abc ;')
         token = self.lex.lex_analysis()
 
 
     def test_05_Alpha(self):
-        # '  abc  ;'
-        self.lex.loadBuffer(' abc ;')
+        # 'abc  ;'
+        self.lex.loadBuffer('abc ;')
         token = self.lex.lex_analysis()
 
 
     def test_06_Alphanumeric(self):
-        #  ' abc123 ;'
-        self.lex.loadBuffer(' abc1d2e3f ;')
+        #  'abc123 ;'
+        self.lex.loadBuffer('abc1d2e3f ;')
         token = self.lex.lex_analysis()
 
 
@@ -79,7 +72,7 @@ class Test_Lexer(unittest.TestCase):
 
     def test_09_operators(self):
         # +, -, /, *, DIV, MOD
-        self.lex.loadBuffer(' DIV ;')
+        self.lex.loadBuffer('DIV ;')
         token = self.lex.lex_analysis()
 
 
