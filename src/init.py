@@ -3,7 +3,7 @@ import src.error
 from src.constants import constants, entry
 from src.symbol_table import lookup, insert
 
-keywords = {'div' : 'DIV', 'mod' : 'MOD'}
+keywords = {'DIV' : constants.DIV, 'mod' : constants.MOD}
 
 def clear_symbol_table():
     constants.SYMBOL_TABLE = []
