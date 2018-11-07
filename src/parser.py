@@ -7,63 +7,68 @@ from src.lexer import lex_manager
 def parse():
     lookahead = lex_manager.lex_analysis()
     while (lookahead != DONE):
-        expr(); 
+        expr(lookahead); 
         match(';')
 
-def expr():
-    term()
+
+def expr(lookahead):
+
+    term(lookahead)
     
     while(True):
-        switch (lookahead):
-        case '+':
-        case '-':
+        if (lookahead == '+' or lookahead == '-'):
             t = lookahead
-            match(lookahead)
-            term()
+            match(t, lookahead)
+            term(lookahead)
             emit(t, None)
-            continue;
-        default:
+        else:
             return
 
-def term():
-    factor()
+def term(lookahead):
 
-    while (True)            
-        switch (lookahead):
-        case '*':
-        case '/':
-        case 'DIV':
-        case 'MOD':                
+    factor(lookahead)
+
+    while (True):
+        if (lookahead in ['*','/','DIV','MOD']):
             t = lookahead
-            match(lookahead)
-            factor()
+            match(t, lookahead)
+            factor(lookahead)
             emit(t, None)
-            continue;
-        default:
+        else:
             return
 
 
-def factor():
-    switch(lookahead)            :
-
-        case "(":
-            match("(")
-            expr()
-            match")"
-            break;
-
-        case NUM:
-            match(NUM, tokenval)
-            match(NUM)
-            break;
-
-        case ID:
-
-        default:
-            error("syntax error")
-
-def match(t):
-    if (lookahead ==t):
-        lookahead = lex_manager.lex_analysis()
-    else
+def factor(lookahead):
+    
+    if (lookahead == "("):
+        match("(", lookahead)
+        expr(lookahead)
+        match(")", lookahead)
+    elif (lookahead == NUM):
+        emit(NUM, tokenval)
+        match(NUM, lookahead)
+    elif (lookahead == ID):
+        emit(ID, tokenval)
+        match(ID, lookahead)
+    else:
         error("syntax error")
+
+def match(t, lookahead):
+    if (lookahead == t):
+        lookahead = lex_manager.lex_analysis()
+    else:
+        error("syntax error")
+
+
+
+# def f(x):
+#     return {
+#         'a': 1,
+#         'b': 2
+#     }.get(x, default) 
+
+# choices = {'a': 1, 'b': 2}
+# result = choices.get(key, 'default')
+
+# expr_choices = {'+': func(), '-': func2() , 'default': return }
+# result = expr_choices.get(key, 'default')
