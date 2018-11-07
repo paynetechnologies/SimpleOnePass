@@ -93,7 +93,7 @@ class Test_Lexer(unittest.TestCase):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('DIV ;')
         token = self.lex.lex_analysis()
-        self.assertEqual(constants.OPERATOR, token)        
+        self.assertEqual(constants.DIV, token)        
 
 
 if __name__ == '__main__':

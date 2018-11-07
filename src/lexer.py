@@ -102,12 +102,6 @@ class lex_manager(object):
             elif (t == self.EOF):
                 return constants.DONE
 
-            elif ( t =="DIV"):
-                return constants.DIV
-
-            elif  (t == "MOD"):
-                return constants.MOD
-
             elif ( t in ["+", "-", "*", "/"] ):
                 return constants.OPERATOR
 
