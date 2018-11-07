@@ -5,8 +5,11 @@ from src.symbol_table import lookup, insert
 
 keywords = {'DIV' : constants.DIV, 'mod' : constants.MOD}
 
+   
 def clear_symbol_table():
     constants.SYMBOL_TABLE = []
+
+
 
 def init_symbol_table():
     '''Loads keywords into SYMBOL_TABLE'''
@@ -18,6 +21,12 @@ def init_symbol_table():
     #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
     for entry in constants.SYMBOL_TABLE:
         print(f'id : {entry.lex} - token : {entry.token}') 
+
+
+
+def init():
+    clear_symbol_table()
+    init_symbol_table()
 
 if (__name__ == "__main__"):
     init_symbol_table()
