@@ -29,11 +29,13 @@ def term(lookahead):
     factor(lookahead)
 
     while (True):
+
         if (lookahead in ['*','/','DIV','MOD']):
             t = lookahead
             match(t, lookahead)
             factor(lookahead)
             emit(t, None)
+
         else:
             return
 
@@ -44,16 +46,20 @@ def factor(lookahead):
         match("(", lookahead)
         expr(lookahead)
         match(")", lookahead)
+
     elif (lookahead == NUM):
         emit(NUM, tokenval)
         match(NUM, lookahead)
+
     elif (lookahead == ID):
         emit(ID, tokenval)
         match(ID, lookahead)
+
     else:
         error("syntax error")
 
 def match(t, lookahead):
+    
     if (lookahead == t):
         lookahead = lex_manager.lex_analysis()
     else:
