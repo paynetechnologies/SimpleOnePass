@@ -3,7 +3,7 @@ import src.error
 from src.constants import constants, entry
 from src.symbol_table import lookup, insert
 
-keywords = {'DIV' : constants.DIV, 'mod' : constants.MOD}
+keywords = {'DIV' : constants.DIV, 'MOD' : constants.MOD}
 
    
 def clear_symbol_table():
@@ -20,7 +20,7 @@ def init_symbol_table():
 
     #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
     for entry in constants.SYMBOL_TABLE:
-        print(f'id : {entry.lex} - token : {entry.token}') 
+        print(f'id : {entry.lexeme} - token : {entry.token}') 
 
 
 

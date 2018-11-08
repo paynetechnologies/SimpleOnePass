@@ -1,6 +1,6 @@
 import unittest
 from src.constants import constants, entry
-from src.lexer import lex_manager
+from src.lexer import lexer
 from src.init import init_symbol_table, clear_symbol_table
 
 '''
@@ -27,29 +27,24 @@ class Test_Lexer(unittest.TestCase):
         clear_symbol_table()
 
     def setUp(self):
-        #init_symbol_table()
-        self.lex = lex_manager()
+        self.lex = lexer()
         self.assertIsNotNone(self.lex)
 
-    # def tearDown(self):
-    #     return super().tearDown()
+    def tearDown(self):
+        return super().tearDown()
 
-    # def test_00_setup_lex_manager(self):
-    #     self.lex = lex_manager()
-    #     self.assertIsNotNone(self.lex)
+
 
     def test_01_newline(self):
         self.lex.loadBuffer('\n;')
         token = self.lex.lex_analysis()
-        #self.assertEqual(constants.NEWLINE, token)
-        self.assertEqual(constants.DONE, token)
+        self.assertEqual(constants.NEWLINE, token)
 
     def test_02_White_Space(self):
         # '   abc ;'
         self.lex.loadBuffer(' ;')
         token = self.lex.lex_analysis()
-        #self.assertEqual(constants.WHITESPACE, token)
-        self.assertEqual(constants.DONE, token)
+        self.assertEqual(constants.WHITESPACE, token)
 
     def test_03_Single_Digit(self):
         # ' 1 ;'
@@ -81,13 +76,11 @@ class Test_Lexer(unittest.TestCase):
         token = self.lex.lex_analysis()
         self.assertEqual(constants.DONE, token)        
 
-
     def test_08_EOF (self):
         # ';'
         self.lex.loadBuffer(';')
         token = self.lex.lex_analysis()
         self.assertEqual(constants.DONE, token)        
-
 
     def test_09_operators(self):
         # +, -, /, *, DIV, MOD

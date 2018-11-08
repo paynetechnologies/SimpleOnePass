@@ -21,6 +21,6 @@ class constants:
 class entry:
     """ a symbol table enry """
     def __init__(self, lex, value):
-        self.lex = lex
+        self.lexeme = lex
         self.token = value
 

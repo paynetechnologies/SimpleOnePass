@@ -1,11 +1,11 @@
 import sys
 import src.error
 from src.constants import constants, entry
-from src.lexer import lex_manager
+from src.lexer import lexer
 
 
 def parse():
-    lookahead = lex_manager.lex_analysis()
+    lookahead = lexer.lex_analysis()
     while (lookahead != DONE):
         expr(lookahead); 
         match(';')
@@ -61,7 +61,7 @@ def factor(lookahead):
 def match(t, lookahead):
     
     if (lookahead == t):
-        lookahead = lex_manager.lex_analysis()
+        lookahead = lexer.lex_analysis()
     else:
         error("syntax error")
 

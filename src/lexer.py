@@ -9,7 +9,7 @@ constants.TOKEN_VALUE = None
 
 inputBuffer = ""
 
-class lex_manager(object):
+class lexer(object):
 
     def __init__(self):
         #self.inputBuffer = inputBfr
@@ -32,12 +32,14 @@ class lex_manager(object):
     def ungetchar(self):
         self.ptr -= 1
 
-    def isNewLine(self, t):
+    @classmethod
+    def isNewLine(cls, t):
         if (t == "\n"):
             return True
         return False
 
-    def isWhiteSpace(self, t):
+    @classmethod
+    def isWhiteSpace(cls, t):
         if (t == " " or t =="\t"):
             return True
         return False
@@ -47,13 +49,19 @@ class lex_manager(object):
         while(True):
             t = self.getchar()
 
-            if (self.isWhiteSpace(t)):
+            if (lexer.isWhiteSpace(t)):
+                while(lexer.isWhiteSpace(t)):
+                    t = self.getchar()
                 constants.TOKEN_VALUE = constants.WHITESPACE
+                return constants.WHITESPACE
 
-            elif (self.isNewLine(t)):
-                constants.LINE_NUMBER += 1
+            elif (lexer.isNewLine(t)):
+                while(lexer.isNewLine(t)):
+                    constants.LINE_NUMBER += 1                    
+                    t = self.getchar()
                 constants.TOKEN_VALUE = constants.NEWLINE
-                      
+                return constants.NEWLINE
+
             elif (t.isdigit()):
                 constants.TOKEN_VALUE = int(t) - 0
                 t = self.getchar()
@@ -110,6 +118,6 @@ class lex_manager(object):
                 return t
 
 if (__name__ == "__main__"):
-    l = lex_manager()
+    l = lexer()
     l.loadBuffer("   a")
     l.lex_analysis()

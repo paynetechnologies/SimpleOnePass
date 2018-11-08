@@ -18,8 +18,8 @@ def lookup(s):
 
     #for (p = last_entry; p > 0 ; p -= 1):
     for indx, entry in reversed(list(enumerate(constants.SYMBOL_TABLE))):
-        if (s == entry.lex):
-            print (f'indx : {indx} - entry {entry.lex, entry.token}')
+        if (s == entry.lexeme):
+            print (f'indx : {indx} - entry {entry.lexeme, entry.token}')
             return indx
     return None
     

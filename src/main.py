@@ -1,8 +1,9 @@
 from src.init import init_symbol_table
 from src.parser import parse
 
+
 def main():
-    init_symbol_table()
+    init()
     parse()
     exit(0)
 
