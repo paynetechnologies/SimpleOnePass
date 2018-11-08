@@ -7,6 +7,11 @@ class Token(object):
     number = 'NUMBER'
     operator = 'OP'
     punctuator = 'PUNC'
+    keyword = 'KEYWORD'
+    block_start = 'START'
+    block_end = 'END'
+
+    keywords = ['if', 'else', 'while', 'output']    
 
     def __init__(self, type, value, line, line_no, line_pos):
         self.type = type
@@ -68,8 +73,11 @@ class Lexer(object):
                 while char in string.ascii_letters:
                     match += char
                     char = self.get_next_char()
-
                 token = Token(Token.ident, match, self.lines[self.line_no], self.line_no, self.line_pos)
+                
+                if match in Token.keywords:
+                    token.type = Token.keyword
+
                 self.tokens.append(token)
 
             # number token
@@ -90,11 +98,27 @@ class Lexer(object):
                 self.tokens.append(token)
                 char = self.get_next_char()
 
-            # pnctuators
-            elif char in ':[](){},;#':
+            # punctuators
+            elif char in ':[](),;#':
                 token = Token(Token.punctuator, char, self.lines[self.line_no], self.line_no, self.line_pos)
                 self.tokens.append(token)
                 char = self.get_next_char()                
+
+            # start block
+            elif char == '{':
+                token = Token(Token.block_start, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)
+                char = self.get_next_char()
+
+            # end block
+            elif char == '}':
+                token = Token(Token.block_end, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)
+                char = self.get_next_char()
+
+            else:
+                raise ValueError('Unexpected character found: {0}:{1} -> {2}\n{3}'.format(self.line_no + 1, self.line_pos + 1, char, self.lines[self.line_no]))
+
 
         # end of file token
         token = Token(Token.eof, char, None, self.line_no, self.line_pos)
