@@ -1,3 +1,4 @@
+''' constants '''
 
 class constants:
     """ Global file declarations """
@@ -19,7 +20,7 @@ class constants:
     WHITESPACE = 999
 
 class entry:
-    """ a symbol table enry """
+    """ a symbol table entry """
     def __init__(self, lex, value):
         self.lexeme = lex
         self.token = value

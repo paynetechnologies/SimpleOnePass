@@ -1,10 +1,10 @@
-from src.init import init_symbol_table
-from src.parser import parse
+from src.init import initialize
+from .parser import parser
 
 
 def main():
-    init()
-    parse()
+    #initialize()
+    parser('9 + 5 - 2 ;')
     exit(0)
 
 

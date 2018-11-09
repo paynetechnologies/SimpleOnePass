@@ -9,8 +9,6 @@ keywords = {'DIV' : constants.DIV, 'MOD' : constants.MOD}
 def clear_symbol_table():
     constants.SYMBOL_TABLE = []
 
-
-
 def init_symbol_table():
     '''Loads keywords into SYMBOL_TABLE'''
     print('init_symbol_table')
@@ -22,11 +20,9 @@ def init_symbol_table():
     for entry in constants.SYMBOL_TABLE:
         print(f'id : {entry.lexeme} - token : {entry.token}') 
 
-
-
-def init():
+def initialize():
     clear_symbol_table()
     init_symbol_table()
 
 if (__name__ == "__main__"):
-    init_symbol_table()
+    initialize()

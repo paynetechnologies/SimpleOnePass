@@ -1,6 +1,6 @@
 import sys
 import array as arr
-import src.error
+from src.error import error
 from src.symbol_table import lookup, insert
 from src.constants import constants, entry
 
@@ -9,10 +9,10 @@ constants.TOKEN_VALUE = None
 
 inputBuffer = ""
 
-class lexer(object):
+class lexer():
 
     def __init__(self):
-        #self.inputBuffer = inputBfr
+        #self.inputBuffer = input
         self.lookahead = ""
         self.ptr = 0
         self.EOF = ';'
@@ -44,7 +44,7 @@ class lexer(object):
             return True
         return False
 
-    def lex_analysis(self):
+    def tokenizer(self):
         t=""
         while(True):
             t = self.getchar()
@@ -118,6 +118,5 @@ class lexer(object):
                 return t
 
 if (__name__ == "__main__"):
-    l = lexer()
-    l.loadBuffer("   a")
-    l.lex_analysis()
+    l = lexer("   a")
+    l.tokenizer()
