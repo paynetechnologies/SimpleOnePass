@@ -22,7 +22,7 @@ class parser(object):
         # lookahead = token
         lookahead = self.lex.tokenizer
         while (lookahead != constants.DONE):
-            self.expr(lookahead); 
+            self.expr(lookahead) 
             self.match(';', lookahead)
 
 
