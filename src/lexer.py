@@ -1,8 +1,8 @@
 import sys
 import array as arr
-from src.error import error
 from src.symbol_table import lookup, insert
 from src.constants import constants, entry
+from src.error import error
 
 constants.LINE_NUMBER = 1
 constants.TOKEN_VALUE = None
@@ -20,6 +20,7 @@ class lexer():
         self.p = self.b = -1
 
     def loadBuffer(self, input):
+        print(f'Loading buffer...')
         self.inputBuffer = input
 
     def getchar(self):
@@ -33,43 +34,43 @@ class lexer():
         self.ptr -= 1
 
     @classmethod
-    def isNewLine(cls, t):
-        if (t == "\n"):
+    def isNewLine(cls, char):
+        if (char == "\n"):
             return True
         return False
 
     @classmethod
-    def isWhiteSpace(cls, t):
-        if (t == " " or t =="\t"):
+    def isWhiteSpace(cls, char):
+        if (char == " " or char =="\t"):
             return True
         return False
 
     def tokenizer(self):
-        t=""
+        char = ""
         while(True):
-            t = self.getchar()
+            char = self.getchar()
 
-            if (lexer.isWhiteSpace(t)):
-                while(lexer.isWhiteSpace(t)):
-                    t = self.getchar()
+            if (lexer.isWhiteSpace(char)):
+                while(lexer.isWhiteSpace(char)):
+                    char = self.getchar()
                 constants.TOKEN_VALUE = constants.WHITESPACE
                 return constants.WHITESPACE
 
-            elif (lexer.isNewLine(t)):
-                while(lexer.isNewLine(t)):
+            elif (lexer.isNewLine(char)):
+                while(lexer.isNewLine(char)):
                     constants.LINE_NUMBER += 1                    
-                    t = self.getchar()
+                    char = self.getchar()
                 constants.TOKEN_VALUE = constants.NEWLINE
                 return constants.NEWLINE
 
-            elif (t.isdigit()):
-                constants.TOKEN_VALUE = int(t) - 0
-                t = self.getchar()
-                while(t.isdigit()):
-                    constants.TOKEN_VALUE = constants.TOKEN_VALUE * 10 + int(t) - 0
-                    t = self.getchar()
+            elif (char.isdigit()):
+                constants.TOKEN_VALUE = int(char) - 0
+                char = self.getchar()
+                while(char.isdigit()):
+                    constants.TOKEN_VALUE = constants.TOKEN_VALUE * 10 + int(char) - 0
+                    char = self.getchar()
 
-                if (t != self.EOF):
+                if (char != self.EOF):
                     self.ungetchar()                    
             
                 self.b += 1
@@ -84,18 +85,18 @@ class lexer():
                 print(f'isdigit : {self.lexbuf[self.b-1]}')
                 return constants.NUM
 
-            elif (t.isalpha()):
+            elif (char.isalpha()):
                 self.b = 0
-                while (t.isalnum()):
-                    self.lexbuf[self.b] = t
-                    t = self.getchar()
+                while (char.isalnum()):
+                    self.lexbuf[self.b] = char
+                    char = self.getchar()
                     self.b += 1
                     if (self.b >= constants.BSIZE):
                         error("compiler error")
 
                 self.lexbuf[self.b] = constants.EOS
 
-                if (t != self.EOF):
+                if (char != self.EOF):
                     self.ungetchar()
                 # create string from slice of list
                 lexeme = ''.join(self.lexbuf[:self.b])
@@ -107,16 +108,17 @@ class lexer():
                 
                 return constants.SYMBOL_TABLE[p].token
             
-            elif (t == self.EOF):
+            elif (char == self.EOF):
                 return constants.DONE
 
-            elif ( t in ["+", "-", "*", "/"] ):
+            elif ( char in ["+", "-", "*", "/"] ):
                 return constants.OPERATOR
 
             else:
                 constants.TOKEN_VALUE = constants.NONE
-                return t
+                return char
 
 if (__name__ == "__main__"):
-    l = lexer("   a")
+    l = lexer()
+    l.loadBuffer("   a")
     l.tokenizer()
