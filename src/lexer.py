@@ -2,7 +2,7 @@ import sys
 import array as arr
 from src.symbol_table import lookup, insert
 from src.constants import constants, entry
-from src.error import error
+from src.error import error_message
 
 constants.LINE_NUMBER = 1
 constants.TOKEN_VALUE = None
@@ -75,7 +75,7 @@ class lexer():
             
                 self.b += 1
                 if (self.b >= constants.BSIZE):
-                    error("compiler error")
+                    error_message("compiler error")
 
                 self.lexbuf[self.b] = constants.TOKEN_VALUE
                 
@@ -92,7 +92,7 @@ class lexer():
                     char = self.getchar()
                     self.b += 1
                     if (self.b >= constants.BSIZE):
-                        error("compiler error")
+                        error_message("compiler error")
 
                 self.lexbuf[self.b] = constants.EOS
 

@@ -1,5 +1,5 @@
 import sys
-from src.error import error
+from src.error import error_message
 from src.constants import constants, entry
 from src.lexer import lexer
 from src.emitter import emit
@@ -14,13 +14,13 @@ class parser(object):
     def match(self, t, lookahead):
         
         if (lookahead == t):
-            lookahead = self.lex.tokenizer
+            lookahead = self.lex.tokenizer()
         else:
-            error("syntax error")
+            error_message("syntax error")
 
     def parse(self):
         # lookahead = token
-        lookahead = self.lex.tokenizer
+        lookahead = self.lex.tokenizer()
         while (lookahead != constants.DONE):
             self.expr(lookahead) 
             self.match(';', lookahead)
@@ -71,7 +71,7 @@ class parser(object):
             self.match(constants.ID, lookahead)
 
         else:
-            error("syntax error")
+            error_message("syntax error")
 
 
 
