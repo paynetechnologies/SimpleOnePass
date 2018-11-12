@@ -21,7 +21,7 @@ class Test_Lexer(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        init_symbol_table()
+        initialize()
 
     @classmethod
     def tearDownClass(cls):
@@ -37,58 +37,63 @@ class Test_Lexer(unittest.TestCase):
 
 
     def test_01_newline(self):
-        self.lex.loadBuffer('\n;')
+        self.lex.loadBuffer('\n')
         token = self.lex.tokenizer()
         self.assertEqual(constants.NEWLINE, token)
 
     def test_02_White_Space(self):
-        # '   abc ;'
-        self.lex.loadBuffer(' ;')
+        # '   '
+        self.lex.loadBuffer('  whitespace ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.WHITESPACE, token)
 
     def test_03_Single_Digit(self):
-        # ' 1 ;'
-        self.lex.loadBuffer('1 ;')
+        # ' 1 '
+        self.lex.loadBuffer('1')
         token = self.lex.tokenizer()
         self.assertEqual(constants.NUM, token)
 
     def test_04_Multiple_Digits(self):
-        # ' 123 ;'
-        self.lex.loadBuffer('123 ;')
+        # ' 123 '
+        self.lex.loadBuffer('123')
         token = self.lex.tokenizer()
         self.assertEqual(constants.NUM, token)
 
     def test_05_Alpha(self):
-        # 'abc  ;'
-        self.lex.loadBuffer('abc ;')
+        # 'abc  '
+        self.lex.loadBuffer('abc ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.ID, token)
 
     def test_06_Alphanumeric(self):
-        #  'abc123 ;'
-        self.lex.loadBuffer('abc1d2e ;')
+        #  'abc123 '
+        self.lex.loadBuffer('abc1d2e ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.ID, token)
 
     def test_07_EmptyString(self):
-        # ';'
-        self.lex.loadBuffer(';')
+        # ''
+        self.lex.loadBuffer(' ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.DONE, token)        
+        self.assertEqual(constants.WHITESPACE, token)        
 
     def test_08_EOF (self):
-        # ';'
-        self.lex.loadBuffer(';')
+        # ''
+        self.lex.loadBuffer('')
         token = self.lex.tokenizer()
         self.assertEqual(constants.DONE, token)        
 
     def test_09_operators(self):
         # +, -, /, *, DIV, MOD
-        self.lex.loadBuffer('DIV ;')
+        self.lex.loadBuffer('DIV ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.DIV, token)        
 
+    def test_10_operators(self):
+        # +, -, /, *, DIV, MOD
+        self.lex.loadBuffer('MOD ')
+        token = self.lex.tokenizer()
+        self.assertEqual(constants.MOD, token)        
 
 if __name__ == '__main__':
     unittest.main()
