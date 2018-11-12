@@ -1,7 +1,7 @@
 import unittest
 from src.constants import constants, entry
 
-class Test_Global(unittest.TestCase):
+class Test_Constants(unittest.TestCase):
     """ Test global variables """
     
     def test_01_create_entry(self):

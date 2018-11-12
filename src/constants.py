@@ -23,8 +23,8 @@ class constants:
 class entry:
     """ a symbol table entry """
     def __init__(self, lex, value):
-        self.lexeme = lex
         self.token = value
+        self.lexeme = lex
 
 E = {
     "null-character":

@@ -1,42 +1,44 @@
 import unittest
 from src.constants import constants, entry
-import symbol
+from src.symbol_table import symbol_table
 
 class Test_init(unittest.TestCase):
     """ Test init """
+    
+    keywords = {'DIV' : 'DIV', 'MOD' : 'MOD'}
+    
+    def __init__(self, *args, **kwargs):
+        super(Test_init, self).__init__(*args, **kwargs)
+        self.symTbl = None
 
-    def test_init(self):
-        keywords = {'div' : 'DIV', 'mod' : 'MOD'}
+    def setUp(self):
         '''Loads keywords into SYMBOL_TABLE'''
-        #constants.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
-        #dict_variable = {key:value for (key,value) in dictonary.items()}
-        print(f'TOK : {tok} - LEX : {lex}' for (tok, lex) in keywords)        
+        for (token, value) in Test_init.keywords.items():
+            print (f'Token : {token} - Value : {value}')    
+
+        self.symTbl = symbol_table()
+        [self.symTbl.st_insert(k, v) for k,v in Test_init.keywords.items()]
+
+        for sym in constants.SYMBOL_TABLE:
+            print(f'Token : {sym.token} - Value : {sym.lexeme}')
+
+    def test_init_symbol_table(self):
+        '''Loads keywords into SYMBOL_TABLE'''        
+        [print(f'Token : {t} - Lexeme : {l}') for t, l in Test_init.keywords.items()]
+        
+        self.symTbl.st_insert('MOD', 'MOD')
+        self.symTbl.st_lookup('MOD')
+        self.symTbl.st_insert('Howard', constants.ID)
+        self.symTbl.st_lookup('Howard')
+        self.symTbl.st_insert('Payne', constants.ID)    
+        self.symTbl.st_lookup('Payne')
+        print('done')
         
         for sym in constants.SYMBOL_TABLE:
-            print(f'TOK : {sym.token} - LEX : {sym.lex}')
-            assert("unknown")
-
-def init():
-    '''Loads keywords into SYMBOL_TABLE'''
-    keywords = {'div' : 'DIV', 'mod' : 'MOD'}
-    constants.SYMBOL_TABLE = {symbol.insert(k, v) for k,v in keywords.items()}
-
-    #constants.SYMBOL_TABLE = {symbol.insert(lex, tok) for lex,tok in keywords}
-    #dict_variable = {key:value for (key,value) in dictonary.items()}
-    for (k,v) in keywords.items():
-        print (f'k {k} - v {v}')    
-    #x,y = {lex:tok for (lex, tok) in keywords.items()}
-    #print (f'x {x} - y {y}')
-    #x1 = {lex:tok for (lex, tok) in keywords.items()}
-    #print (f'x1 {x1}')
-
-    #print(f' LEX : {l} - TOK : {t} ') 
-    
-    # for sym in constants.SYMBOL_TABLE:
-    #     print(f'TOK : {sym.token} - LEX : {sym.lex}')
-    #     assert("unknown")
+            print(f'Token : {sym.token} - Value : {sym.lexeme}')
 
 if __name__ == '__main__':
-    #unittest.main()
-    init()
-    
+    unittest.main()
+    # ti = Test_init()
+    # ti.setup()
+    # ti.test_init_symbol_table()
