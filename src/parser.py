@@ -5,84 +5,73 @@ from src.lexer import lexer
 from src.emitter import emit
 
 class parser(object):
-    
+
+    lookahead = 0
+
     def __init__(self, input):
         self.input = input
         self.lex = lexer()
         self.lex.loadBuffer(self.input)
 
-    def match(self, t, lookahead):
+    def match(self, t):
         
-        if (lookahead == t):
-            lookahead = self.lex.tokenizer()
+        if (parser.lookahead == t):
+            parser.lookahead = self.lex.tokenizer()
         else:
             error_message("syntax error")
 
     def parse(self):
         # lookahead = token
-        lookahead = self.lex.tokenizer()
-        while (lookahead != constants.DONE):
-            self.expr(lookahead) 
-            self.match(';', lookahead)
+        parser.lookahead = self.lex.tokenizer()
+        while (parser.lookahead != constants.DONE):
+            self.expr() 
+            #self.match(';') separtor between lines???
 
 
-    def expr(self, lookahead):
+    def expr(self):
 
-        self.term(lookahead)
+        self.term()
         
         while(True):
-            if (lookahead == '+' or lookahead == '-'):
-                t = lookahead
-                self.match(t, lookahead)
-                self.term(lookahead)
+            if (parser.lookahead == '+' or parser.lookahead == '-'):
+                t = parser.lookahead
+                self.match(t)
+                self.term()
                 emit(t, None)
             else:
                 return
 
-    def term(self, lookahead):
+    def term(self ):
 
-        self.factor(lookahead)
+        self.factor()
 
         while (True):
 
-            if (lookahead in ['*','/','DIV','MOD']):
-                t = lookahead
-                self.match(t, lookahead)
-                self.factor(lookahead)
+            if (parser.lookahead in ['*','/','DIV','MOD']):
+                t = parser.lookahead
+                self.match(t)
+                self.factor()
                 emit(t, None)
 
             else:
                 return
 
 
-    def factor(self, lookahead):
+    def factor(self):
         
-        if (lookahead == "("):
-            self.match("(", lookahead)
-            self.expr(lookahead)
-            self.match(")", lookahead)
+        if (parser.lookahead == "("):
+            self.match("(")
+            self.expr()
+            self.match(")")
 
-        elif (lookahead == constants.NUM):
-            emit(constants.NUM, 'tokenval')
-            self.match(constants.NUM, lookahead)
+        elif (parser.lookahead == constants.NUM):
+            emit(constants.NUM, constants.token_value)
+            self.match(constants.NUM)
 
-        elif (lookahead == constants.ID):
-            emit(constants.ID, 'tokenval')
-            self.match(constants.ID, lookahead)
+        elif (parser.lookahead == constants.ID):
+            emit(constants.ID, lexer.token_value)
+            self.match(constants.ID)
 
         else:
             error_message("syntax error")
 
-
-
-    # def f(x):
-    #     return {
-    #         'a': 1,
-    #         'b': 2
-    #     }.get(x, default) 
-
-    # choices = {'a': 1, 'b': 2}
-    # result = choices.get(key, 'default')
-
-    # expr_choices = {'+': func(), '-': func2() , 'default': return }
-    # result = expr_choices.get(key, 'default')

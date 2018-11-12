@@ -2,12 +2,10 @@
 
 class constants:
     """ Global file declarations """
-    BSIZE   = 128
+    BUFFERSIZE   = 128
     EOS     = '\0'
-    EOF     = False
-    LINE_NUMBER   = 0
+    EOF     = True
     SYMBOL_TABLE = []
-    TOKEN_VALUE = 0
 
     DIV     = 256
     DONE    = 257
