@@ -10,18 +10,23 @@ class lexer():
     newline ='\n'
     whitespace = ' \t'
 
+        # STRMAX = 999 # size of lexeme list
+        # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
+        # self.last_char = -1 # last used position in lexemes
+
+
     def __init__(self):
-        self.input_ptr = 0
-        self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        self.input_ptr = -1
+        #@self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
         self.lexeme_buffer_ptr = -1
         self.token_value = None    
-        self.cursor = 0 # same as ptr
+        self.cursor = 1 # same as ptr
         self.tokens = [] 
         self.line_no = 0
         self.line_pos = 0
 
     def loadBuffer(self, input):
-        print(f'Loading buffer...')
         self.inputBuffer = input
         self.lines = input.split(lexer.newline)
 
@@ -32,7 +37,7 @@ class lexer():
         if self.input_ptr > len(self.inputBuffer):
             return lexer.eof_marker
 
-        c = self.inputBuffer[self.input_ptr-1]
+        c = self.inputBuffer[self.input_ptr]
         return c
 
     def ungetchar(self):
@@ -45,22 +50,29 @@ class lexer():
 
             # whitespace
             if (char in lexer.whitespace):
-                constants.token_value = constants.WHITESPACE                
-                char = self.get_next_char()
+                lexer.token_value = constants.WHITESPACE                
+                while char in lexer.whitespace:
+                    char = self.get_next_char()
+                self.ungetchar()
+                return constants.WHITESPACE
 
             # newline
             elif (char in lexer.newline):
                 lexer.token_value = constants.NEWLINE
-                self.line_no += 1                    
-                self.line_pos = 0
-                char = self.get_next_char()
+                while char in lexer.newline:
+                    self.line_no += 1                    
+                    self.line_pos = 0
+                    char = self.get_next_char()
+                self.ungetchar()
+                return constants.NEWLINE                
 
             # comment
             elif char in lexer.comment_marker:
+                lexer.token_value = constants.COMMENTS
                 while char not in lexer.newline:
                     char = self.get_next_char()
 
-            # digits
+            # 
             elif (char in string.digits):
                 match = char
                 lexer.token_value = int(char) - 0
@@ -81,21 +93,18 @@ class lexer():
                 while (char.isalnum()):
                     match += char
                     char = self.get_next_char()
-
+                
+                # lenValue = len(match)
+                # if (self.last_char + lenValue > symbol_table.STRMAX ):
+                #     error_message("lexeme list full")
                 self.lexeme_buffer_ptr += 1
                 if (self.lexeme_buffer_ptr >= constants.BUFFERSIZE):
                     error_message("compiler error :: Lexeme Buffer Overflow")                    
 
                 self.lexeme_buffer[self.lexeme_buffer_ptr] = match
 
-                '''
-                self.lexeme_buffer_ptr += 1
-                if (self.lexeme_buffer_ptr >= constants.BUFFERSIZE):
-                    error_message("compiler error :: Lexeme Buffer Overflow")
-                self.lexeme_buffer[self.lexeme_buffer_ptr] = constants.EOS
-                create string from slice of list
-                lexeme = ''.join(self.lexeme_buffer[:self.lexeme_buffer_ptr])
-                '''
+                # create string from slice of list
+                # lexeme = ''.join(self.lexeme_buffer[:self.lexeme_buffer_ptr])
 
                 lexeme = self.lexeme_buffer[self.lexeme_buffer_ptr]
 
