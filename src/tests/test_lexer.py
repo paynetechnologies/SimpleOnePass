@@ -1,8 +1,7 @@
 import unittest
-from src.init import initialize
 from src.constants import constants, entry
 from src.lexer import lexer
-from src.init import init_symbol_table, clear_symbol_table
+from src.init import init
 
 '''
 Newline
@@ -21,11 +20,11 @@ class Test_Lexer(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        initialize()
+        init.init_symbol_table()
 
     @classmethod
     def tearDownClass(cls):
-        clear_symbol_table()
+        init.clear_symbol_table()
 
     def setUp(self): 
         self.lex = lexer()
