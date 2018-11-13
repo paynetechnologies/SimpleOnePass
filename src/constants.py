@@ -18,6 +18,8 @@ class constants:
     OPERATOR = 262
     WHITESPACE = 999
 
+    line_no=0
+
 
 
 class entry:
