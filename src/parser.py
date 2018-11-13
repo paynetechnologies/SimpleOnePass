@@ -18,14 +18,14 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
-            error_message("syntax error")
+            error_message(constants.line_no,"syntax error")
 
     def parse(self):
         # lookahead = token
         parser.lookahead = self.lex.tokenizer()
-        while (parser.lookahead != constants.DONE):
+        while (parser.lookahead != self.lex.eof_marker):
             self.expr() 
-            #self.match(';') separtor between lines???
+            self.match('$')
 
 
     def expr(self):
