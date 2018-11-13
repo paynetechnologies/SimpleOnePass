@@ -5,25 +5,33 @@ from src.symbol_table import symbol_table
 
 keywords = {'DIV' : constants.DIV, 'MOD' : constants.MOD}
 
-   
-def clear_symbol_table():
-    constants.SYMBOL_TABLE = []
+class init:
+    def __init__(self):
+        super().__init__()
 
-def init_symbol_table(st):
-    '''Loads keywords into SYMBOL_TABLE'''
-    print('init_symbol_table')
+    @classmethod
+    def clear_symbol_table(cls):
+        constants.SYMBOL_TABLE = []
+    
+    @classmethod
+    def init_symbol_table(cls):
+        '''Loads keywords into SYMBOL_TABLE'''
+        print('init_symbol_table')
 
-    for lex,tok in keywords.items():
-        st.insert(lex, tok) 
+        for lex,tok in keywords.items():
+            symbol_table.insert(lex, tok) 
 
-    #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
-    for entry in constants.SYMBOL_TABLE:
-        print(f'lexeme : {entry.lexeme} - token : {entry.token}') 
+        #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
+        for entry in constants.SYMBOL_TABLE:
+            print(f'lexeme : {entry.lexeme} - token : {entry.token}') 
 
-def init():
-    st = symbol_table()
-    clear_symbol_table()
-    init_symbol_table(st)
+    @classmethod
+    def init_symboltable(cls):
+        clear_symbol_table()
+        init_symbol_table()
 
 if (__name__ == "__main__"):
-    init()
+    i = init()
+    init.clear_symbol_table()
+    init.init_symbol_table()
+
