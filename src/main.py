@@ -1,13 +1,10 @@
 import sys
 from src.parser import parser
-from src.init import initialize
+from src.init import init
 
 def main():
-    #initialize()
-    p = parser('abc + 5')
-    #p = parser('9+5')
-    #p = parser('9 + 5 - 2')
-    #p = parser(';')
+    init()
+    p = parser('9 + 5 - 2')
     p.parse()
 
 

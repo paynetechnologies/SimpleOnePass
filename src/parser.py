@@ -69,9 +69,9 @@ class parser(object):
             self.match(constants.NUM)
 
         elif (parser.lookahead == constants.ID):
-            emit(constants.ID, lexer.token_value)
+            emit(constants.ID, constants.token_value)
             self.match(constants.ID)
 
         else:
-            error_message("syntax error")
+            error_message(constants.line_no,"syntax error")
 

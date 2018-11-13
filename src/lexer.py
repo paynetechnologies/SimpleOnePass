@@ -20,7 +20,7 @@ class lexer():
         #self.lexeme_buffer = [None] * constants.BUFFERSIZE
         self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
         self.lexeme_buffer_ptr = -1
-        self.token_value = None    
+        #self.token_value = None    
         self.cursor = 1 # same as ptr
         self.tokens = [] 
         self.line_no = 0
@@ -50,40 +50,40 @@ class lexer():
 
             # whitespace
             if (char in lexer.whitespace):
-                lexer.token_value = constants.WHITESPACE                
+                constants.token_value = constants.WHITESPACE                
                 while char in lexer.whitespace:
                     char = self.get_next_char()
-                self.ungetchar()
-                return constants.WHITESPACE
+                #self.ungetchar()
+                #return constants.WHITESPACE
 
             # newline
             elif (char in lexer.newline):
-                lexer.token_value = constants.NEWLINE
+                constants.token_value = constants.NEWLINE
                 while char in lexer.newline:
                     self.line_no += 1                    
                     self.line_pos = 0
                     char = self.get_next_char()
-                self.ungetchar()
-                return constants.NEWLINE                
+                #self.ungetchar()
+                #return constants.NEWLINE                
 
             # comment
             elif char in lexer.comment_marker:
-                lexer.token_value = constants.COMMENTS
+                constants.token_value = constants.COMMENTS
                 while char not in lexer.newline:
                     char = self.get_next_char()
 
             # 
             elif (char in string.digits):
                 match = char
-                lexer.token_value = int(char) - 0
+                constants.token_value = int(char) - 0
                 char = self.get_next_char()
                 
                 while(char in string.digits):                    
                     match += char
-                    lexer.token_value = lexer.token_value * 10 + int(char) - 0
+                    constants.token_value = constants.token_value * 10 + int(char) - 0
                     char = self.get_next_char()
             
-                print(f'isdigit : {lexer.token_value}')
+                print(f'isdigit : {constants.token_value}')
                 return constants.NUM
 
             # alpha and alphanumeric     
@@ -115,7 +115,7 @@ class lexer():
                 if (symbol_table_index == None):
                     symbol_table_index = symbol_table.insert(lexeme, constants.ID)
                 
-                lexer.token_value = symbol_table_index
+                constants.token_value = symbol_table_index
                 
                 return constants.SYMBOL_TABLE[symbol_table_index].token
             
