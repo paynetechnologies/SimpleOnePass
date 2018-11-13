@@ -82,17 +82,41 @@ class Test_Lexer(unittest.TestCase):
         token = self.lex.tokenizer()
         self.assertEqual(constants.DONE, token)        
 
-    def test_09_operators(self):
+    def test_09_DIV_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('DIV ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.DIV, token)        
 
-    def test_10_operators(self):
+    def test_10_MOD_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('MOD ')
         token = self.lex.tokenizer()
         self.assertEqual(constants.MOD, token)        
+
+    def test_11_Plus_operators(self):
+        # +, -, /, *
+        self.lex.loadBuffer('+ ')
+        token = self.lex.tokenizer()
+        self.assertEqual(constants.OPERATOR, token)        
+
+    def test_12_Minus_operators(self):
+        # +, -, /, *
+        self.lex.loadBuffer('- ')
+        token = self.lex.tokenizer()
+        self.assertEqual(constants.OPERATOR, token)        
+
+    def test_13_Div_operators(self):
+        # +, -, /, *, DIV, MOD
+        self.lex.loadBuffer('/ ')
+        token = self.lex.tokenizer()
+        self.assertEqual(constants.OPERATOR, token)        
+
+    def test_14_Mult_operators(self):
+        # +, -, /, *, DIV, MOD
+        self.lex.loadBuffer('* ')
+        token = self.lex.tokenizer()
+        self.assertEqual(constants.OPERATOR, token)        
 
 if __name__ == '__main__':
     unittest.main()
