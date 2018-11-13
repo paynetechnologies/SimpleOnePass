@@ -17,7 +17,7 @@ class Test_init(unittest.TestCase):
             print (f'Token : {token} - Value : {value}')    
 
         self.symTbl = symbol_table()
-        [self.symTbl.st_insert(k, v) for k,v in Test_init.keywords.items()]
+        [self.symTbl.symbol_table_insert(k, v) for k,v in Test_init.keywords.items()]
 
         for sym in constants.SYMBOL_TABLE:
             print(f'Token : {sym.token} - Value : {sym.lexeme}')
@@ -26,12 +26,12 @@ class Test_init(unittest.TestCase):
         '''Loads keywords into SYMBOL_TABLE'''        
         [print(f'Token : {t} - Lexeme : {l}') for t, l in Test_init.keywords.items()]
         
-        self.symTbl.st_insert('MOD', 'MOD')
-        self.symTbl.st_lookup('MOD')
-        self.symTbl.st_insert('Howard', constants.ID)
-        self.symTbl.st_lookup('Howard')
-        self.symTbl.st_insert('Payne', constants.ID)    
-        self.symTbl.st_lookup('Payne')
+        self.symTbl.symbol_table_insert('MOD', 'MOD')
+        self.symTbl.symbol_table_lookup('MOD')
+        self.symTbl.symbol_table_insert('Howard', constants.ID)
+        self.symTbl.symbol_table_lookup('Howard')
+        self.symTbl.symbol_table_insert('Payne', constants.ID)    
+        self.symTbl.symbol_table_lookup('Payne')
         print('done')
         
         for sym in constants.SYMBOL_TABLE:
