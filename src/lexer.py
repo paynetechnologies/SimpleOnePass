@@ -1,6 +1,6 @@
 import sys
 import string
-from src.symbol_table import lookup, insert
+from src.symbol_table import symbol_table
 from src.constants import constants, entry
 from src.error import error_message
 
@@ -17,7 +17,7 @@ class lexer():
 
     def __init__(self):
         self.input_ptr = -1
-        #@self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        #self.lexeme_buffer = [None] * constants.BUFFERSIZE
         self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
         self.lexeme_buffer_ptr = -1
         self.token_value = None    
@@ -34,7 +34,7 @@ class lexer():
         self.input_ptr += 1
         self.line_pos += 1
 
-        if self.input_ptr > len(self.inputBuffer):
+        if self.input_ptr >= len(self.inputBuffer):
             return lexer.eof_marker
 
         c = self.inputBuffer[self.input_ptr]
@@ -110,10 +110,10 @@ class lexer():
 
                 # Symbol Table Lookup and Insert
                 symbol_table_index = None
-                symbol_table_index = lookup(lexeme)
+                symbol_table_index = symbol_table.lookup(lexeme)
 
                 if (symbol_table_index == None):
-                    symbol_table_index = insert(lexeme, constants.ID)
+                    symbol_table_index = symbol_table.insert(lexeme, constants.ID)
                 
                 lexer.token_value = symbol_table_index
                 
