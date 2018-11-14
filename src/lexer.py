@@ -18,10 +18,10 @@ class lexer():
 
     def __init__(self):
         self.input_ptr = -1
-        #self.lexeme_buffer = [None] * constants.BUFFERSIZE
-        self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
+        self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        #self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
         self.lexeme_buffer_ptr = -1
-        #self.token_value = None    
+        self.token_value = None    
         self.cursor = 1 # same as ptr
         self.tokens = [] 
         self.line_no = 0
@@ -54,8 +54,6 @@ class lexer():
                 constants.token_value = constants.WHITESPACE                
                 while char in lexer.whitespace:
                     char = self.get_next_char()
-                #self.ungetchar()
-                #return constants.WHITESPACE
 
             # newline
             elif (char in lexer.newline):
@@ -64,8 +62,6 @@ class lexer():
                     self.line_no += 1                    
                     self.line_pos = 0
                     char = self.get_next_char()
-                #self.ungetchar()
-                #return constants.NEWLINE                
 
             # comment
             elif char in lexer.comment_marker:
@@ -73,7 +69,7 @@ class lexer():
                 while char not in lexer.newline:
                     char = self.get_next_char()
 
-            # 
+            # number
             elif (char in string.digits):
                 match = char
                 constants.token_value = int(char) - 0
@@ -83,7 +79,8 @@ class lexer():
                     match += char
                     constants.token_value = constants.token_value * 10 + int(char) - 0
                     char = self.get_next_char()
-            
+                self.ungetchar()                
+
                 print(f'isdigit : {constants.token_value}')
                 return constants.NUM
 
@@ -94,7 +91,8 @@ class lexer():
                 while (char.isalnum()):
                     match += char
                     char = self.get_next_char()
-                
+                self.ungetchar()
+
                 # lenValue = len(match)
                 # if (self.last_char + lenValue > symbol_table.STRMAX ):
                 #     error_message("lexeme list full")
