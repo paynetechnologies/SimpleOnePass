@@ -14,7 +14,7 @@ def emit(t, tval):
 def emit(t, tval):
     
     # case "+": case "-": case "*": case "/":
-    if (t == constants.OPERATOR):
+    if (t in ['+', '-', '/', '*']):
         print(f'{t} ')
 
     # case DIV:        
@@ -34,4 +34,4 @@ def emit(t, tval):
         print(f'{constants.SYMBOL_TABLE[tval].lexeme} ')     
 
     else:
-        print(f'token {t} tokenval {tval} ')
+        print(f'token {t}, tokenval {tval} ')

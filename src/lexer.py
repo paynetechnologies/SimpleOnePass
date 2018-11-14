@@ -9,6 +9,7 @@ class lexer():
     eof_marker = '$'
     newline ='\n'
     whitespace = ' \t'
+    operators = ['+', '-', '/', '*']
 
         # STRMAX = 999 # size of lexeme list
         # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
@@ -116,15 +117,28 @@ class lexer():
                     symbol_table_index = symbol_table.insert(lexeme, constants.ID)
                 
                 constants.token_value = symbol_table_index
-                
                 return constants.SYMBOL_TABLE[symbol_table_index].token
             
             # Operators
-            elif ( char in ["+", "-", "*", "/"] ):
-                return char #constants.OPERATOR
+            elif ( char == "+"):
+                constants.token_value = constants.PLUS
+                return char 
+
+            elif ( char == "-"):
+                constants.token_value = constants.MINUS
+                return char 
+
+            elif ( char == "*"):
+                constants.token_value = constants.MULTIPLY
+                return char 
+
+            elif ( char == "/"):
+                constants.token_value = constants.DIVIDE
+                return char
 
             # EOF
             elif (char == constants.EOF):
+                constants.token_value = contants.EOF
                 return constants.DONE
 
             # All others
@@ -132,30 +146,9 @@ class lexer():
                 constants.token_value = constants.NONE
                 return char
         
-        return constants.DONE
+        return constants.EOF
 
 if (__name__ == "__main__"):
     l = lexer()
     l.loadBuffer("   a")
     l.tokenizer()
-
-
-
-    # @classmethod
-    # def isNewLine(cls, char):
-    #     if (char == "\n"):
-    #         return True
-    #     return False
-
-    # @classmethod
-    # def isWhiteSpace(cls, char):
-    #     if (char == " " or char =="\t"):
-    #         return True
-    #     return False
-
-    # def get_next_char(self):
-    #     c = self.inputBuffer[self.input_ptr]
-    #     if (c == ';'):
-    #         constants.EOF = True
-    #     self.input_ptr += 1
-    #     return c

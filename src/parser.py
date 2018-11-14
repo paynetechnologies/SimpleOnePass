@@ -25,7 +25,7 @@ class parser(object):
         parser.lookahead = self.lex.tokenizer()
         while (parser.lookahead != self.lex.eof_marker):
             self.expr() 
-            self.match('$')
+            #self.match('$')
 
 
     def expr(self):
@@ -35,9 +35,7 @@ class parser(object):
         while(True):
             if (parser.lookahead == '+' or parser.lookahead == '-'):
                 t = parser.lookahead
-                self.match(t)
-                self.term()
-                emit(t, None)
+                self.match(t); self.term(); emit(t, constants.NONE)
             else:
                 return
 
@@ -49,9 +47,7 @@ class parser(object):
 
             if (parser.lookahead in ['*','/','DIV','MOD']):
                 t = parser.lookahead
-                self.match(t)
-                self.factor()
-                emit(t, None)
+                self.match(t) ; self.factor(); emit(t, constants.NONE)
 
             else:
                 return
@@ -60,18 +56,13 @@ class parser(object):
     def factor(self):
         
         if (parser.lookahead == "("):
-            self.match("(")
-            self.expr()
-            self.match(")")
+            self.match("(") ;  self.expr(); self.match(")")
 
         elif (parser.lookahead == constants.NUM):
-            emit(constants.NUM, constants.token_value)
-            self.match(constants.NUM)
+            emit(constants.NUM, constants.token_value) ; self.match(constants.NUM)
 
         elif (parser.lookahead == constants.ID):
-            emit(constants.ID, constants.token_value)
-            self.match(constants.ID)
-
+            emit(constants.ID, constants.token_value); self.match(constants.ID)
         else:
             error_message(constants.line_no,"syntax error")
 

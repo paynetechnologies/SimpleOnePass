@@ -98,25 +98,25 @@ class Test_Lexer(unittest.TestCase):
         # +, -, /, *
         self.lex.loadBuffer('+ ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.OPERATOR, token)        
+        self.assertEqual(constants.PLUS, token)        
 
     def test_12_Minus_operators(self):
         # +, -, /, *
         self.lex.loadBuffer('- ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.OPERATOR, token)        
+        self.assertEqual(constants.MINUS, token)        
 
     def test_13_Div_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('/ ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.OPERATOR, token)        
+        self.assertEqual(constants.DIVIDE, token)        
 
     def test_14_Mult_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('* ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.OPERATOR, token)        
+        self.assertEqual(constants.MULTIPLY, token)        
 
 if __name__ == '__main__':
     unittest.main()

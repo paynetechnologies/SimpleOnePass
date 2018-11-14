@@ -84,7 +84,7 @@ class Lexer(object):
             elif char in string.digits:
                 match = char
                 char = self.get_next_char()
-                token.type = Token.ident
+                #token.type = Token.number
                 while char in string.digits:
                     match += char
                     char = self.get_next_char()
