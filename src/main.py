@@ -4,7 +4,8 @@ from src.init import init
 
 def main():
     init()
-    p = parser( 'A + B + (C * D)' )
+    #p = parser( 'A + B + (C * D)' )
+    p = parser( '(E + F) * (G + H)' )
     p.parse()
 
 
