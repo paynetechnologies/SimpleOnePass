@@ -98,7 +98,7 @@ class lexer():
                 #     error_message("lexeme list full")
                 self.lexeme_buffer_ptr += 1
                 if (self.lexeme_buffer_ptr >= constants.BUFFERSIZE):
-                    error_message("compiler error :: Lexeme Buffer Overflow")                    
+                    error_message(constants.line_no,"compiler error :: Lexeme Buffer Overflow")                    
 
                 self.lexeme_buffer[self.lexeme_buffer_ptr] = match
 
@@ -136,7 +136,7 @@ class lexer():
 
             # EOF
             elif (char == constants.EOF):
-                constants.token_value = contants.EOF
+                constants.token_value = constants.EOF
                 return constants.DONE
 
             # All others
