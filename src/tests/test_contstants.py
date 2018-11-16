@@ -13,7 +13,7 @@ class Test_Constants(unittest.TestCase):
     def test_02_add_entry_to_symbolTable(self):
         e = entry("lexeme",0)
         constants.SYMBOL_TABLE.append(e)
-        print(f'\nSYMBOL_TABLE : {constants.SYMBOL_TABLE[0].lexeme, constants.SYMBOL_TABLE[0].token }')
+        print(f'\nSYMBOL_TABLE : {Token..SYMBOL_TABLE[0].lexeme, Token..SYMBOL_TABLE[0].token }')
         self.assertEqual(constants.SYMBOL_TABLE[0].lexeme, 'lexeme')
         self.assertEqual(constants.SYMBOL_TABLE[0].token, 0)
 

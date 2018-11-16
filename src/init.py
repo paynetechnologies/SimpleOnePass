@@ -2,8 +2,9 @@ import sys
 import src.error
 from src.constants import constants, entry
 from src.symbol_table import symbol_table
+from src.token import Token
 
-keywords = {'DIV' : constants.DIV, 'MOD' : constants.MOD}
+keywords = {'DIV' : Token.DIV, 'MOD' : Token.MOD}
 
 class init:
     def __init__(self):

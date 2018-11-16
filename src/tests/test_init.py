@@ -1,5 +1,5 @@
 import unittest
-from src.constants import constants, entry
+from src.Token. import Token., entry
 from src.symbol_table import symbol_table
 
 class Test_init(unittest.TestCase):
@@ -19,7 +19,7 @@ class Test_init(unittest.TestCase):
         self.symTbl = symbol_table()
         [self.symTbl.symbol_table_insert(k, v) for k,v in Test_init.keywords.items()]
 
-        for sym in constants.SYMBOL_TABLE:
+        for sym in Token..SYMBOL_TABLE:
             print(f'Token : {sym.token} - Value : {sym.lexeme}')
 
     def test_init_symbol_table(self):
@@ -28,13 +28,13 @@ class Test_init(unittest.TestCase):
         
         self.symTbl.symbol_table_insert('MOD', 'MOD')
         self.symTbl.symbol_table_lookup('MOD')
-        self.symTbl.symbol_table_insert('Howard', constants.ID)
+        self.symTbl.symbol_table_insert('Howard', Token..ID)
         self.symTbl.symbol_table_lookup('Howard')
-        self.symTbl.symbol_table_insert('Payne', constants.ID)    
+        self.symTbl.symbol_table_insert('Payne', Token..ID)    
         self.symTbl.symbol_table_lookup('Payne')
         print('done')
         
-        for sym in constants.SYMBOL_TABLE:
+        for sym in Token..SYMBOL_TABLE:
             print(f'Token : {sym.token} - Value : {sym.lexeme}')
 
 if __name__ == '__main__':

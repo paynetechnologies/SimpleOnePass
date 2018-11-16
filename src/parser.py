@@ -3,6 +3,7 @@ from src.error import error_message
 from src.constants import constants, entry
 from src.lexer import lexer
 from src.emitter import emit
+from src.token import Token
 
 class parser(object):
 
@@ -18,13 +19,14 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
-            error_message(constants.line_no,"syntax error")
+            error_message(Token.line_no,"syntax error")
 
     def parse(self):
         parser.lookahead = self.lex.tokenizer()
-        while (parser.lookahead != self.lex.eof_marker):
+        while (parser.lookahead != Token.EOF):
             self.expr() 
-#           self.match(' ')
+        for token in self.lex.tokens:
+            print(token)
 
 
     def expr(self):
@@ -34,7 +36,7 @@ class parser(object):
         while(True):
             if (parser.lookahead == '+' or parser.lookahead == '-'):
                 t = parser.lookahead
-                self.match(t); self.term(); emit(t, constants.NONE)
+                self.match(t); self.term(); emit(t, Token.NONE)
             else:
                 return
 
@@ -48,7 +50,7 @@ class parser(object):
                 t = parser.lookahead
                 self.match(t)
                 self.factor()
-                emit(t, constants.NONE)
+                emit(t, Token.NONE)
 
             else:
                 return
@@ -61,11 +63,11 @@ class parser(object):
             self.expr()
             self.match(")")
 
-        elif (parser.lookahead == constants.NUM):
-            emit(constants.NUM, constants.token_value) ; self.match(constants.NUM)
+        elif (parser.lookahead == Token.NUM):
+            emit(Token.NUM, Token.token_value) ; self.match(Token.NUM)
 
-        elif (parser.lookahead == constants.ID):
-            emit(constants.ID, constants.token_value); self.match(constants.ID)
+        elif (parser.lookahead == Token.ID):
+            emit(Token.ID, Token.token_value); self.match(Token.ID)
         else:
-            error_message(constants.line_no,"syntax error")
+            error_message(Token.line_no,"syntax error")
 

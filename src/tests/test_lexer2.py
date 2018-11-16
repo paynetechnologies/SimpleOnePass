@@ -23,7 +23,9 @@ class Test_Lexer2(unittest.TestCase):
         except:       
             error_message(f'cannot open file {"tokenize-example-2.py"}')     
             exit(self, 0)
+
         lexer = Lexer(file.read())
+        
         for token in lexer.tokenise():
             print (token)
         

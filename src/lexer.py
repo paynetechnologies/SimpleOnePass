@@ -3,33 +3,39 @@ import string
 from src.symbol_table import symbol_table
 from src.constants import constants, entry
 from src.error import error_message
+from src.token import Token
+
 
 class lexer():
+
     comment_marker = '#'
     eof_marker = '$'
     newline ='\n'
     whitespace = ' \t'
-    operators = ['+', '-', '/', '*']
+    operators = ['+', '-', '/', '*', 'MOD', 'DIV']
 
-        # STRMAX = 999 # size of lexeme list
-        # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
-        # self.last_char = -1 # last used position in lexemes
-
+    # STRMAX = 999 # size of lexeme list
+    # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
+    # self.last_char = -1 # last used position in lexemes
 
     def __init__(self):
+        
+        #self.cursor = 1 # same as ptr
         self.input_ptr = -1
-        self.lexeme_buffer = [None] * constants.BUFFERSIZE
-        #self.lexeme_buffer = ['' for i in range(constants.BUFFERSIZE)]
-        self.lexeme_buffer_ptr = -1
-        self.token_value = None    
-        self.cursor = 1 # same as ptr
-        self.tokens = [] 
         self.line_no = 0
         self.line_pos = 0
+
+        self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        self.lexeme_buffer_ptr = -1
+
+        self.token_value = None    
+        self.tokens = [] 
+
 
     def loadBuffer(self, input):
         self.inputBuffer = input
         self.lines = input.split(lexer.newline)
+
 
     def get_next_char(self):
         self.input_ptr += 1
@@ -38,26 +44,26 @@ class lexer():
         if self.input_ptr >= len(self.inputBuffer):
             return lexer.eof_marker
 
-        c = self.inputBuffer[self.input_ptr]
-        return c
+        return self.inputBuffer[self.input_ptr]
+
 
     def ungetchar(self):
         self.input_ptr -= 1
 
+
     def tokenizer(self):
 
         char = self.get_next_char()
+
         while (char != lexer.eof_marker):            
 
             # whitespace
             if (char in lexer.whitespace):
-                constants.token_value = constants.WHITESPACE                
                 while char in lexer.whitespace:
                     char = self.get_next_char()
 
             # newline
             elif (char in lexer.newline):
-                constants.token_value = constants.NEWLINE
                 while char in lexer.newline:
                     self.line_no += 1                    
                     self.line_pos = 0
@@ -65,40 +71,39 @@ class lexer():
 
             # comment
             elif char in lexer.comment_marker:
-                constants.token_value = constants.COMMENTS
                 while char not in lexer.newline:
                     char = self.get_next_char()
 
             # number
             elif (char in string.digits):
                 match = char
-                constants.token_value = int(char) - 0
+                Token.token_value = int(char) - 0
                 char = self.get_next_char()
                 
                 while(char in string.digits):                    
                     match += char
-                    constants.token_value = constants.token_value * 10 + int(char) - 0
+                    Token.token_value = Token.token_value * 10 + int(char) - 0
                     char = self.get_next_char()
                 self.ungetchar()                
 
-                print(f'isdigit : {constants.token_value}')
-                return constants.NUM
+                token = Token(Token.NUM, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                   
+                return Token.NUM
 
             # alpha and alphanumeric     
             elif (char.isalpha()):
                 match = char
                 char = self.get_next_char()
+                
                 while (char.isalnum()):
                     match += char
                     char = self.get_next_char()
                 self.ungetchar()
 
-                # lenValue = len(match)
-                # if (self.last_char + lenValue > symbol_table.STRMAX ):
-                #     error_message("lexeme list full")
                 self.lexeme_buffer_ptr += 1
+
                 if (self.lexeme_buffer_ptr >= constants.BUFFERSIZE):
-                    error_message(constants.line_no,"compiler error :: Lexeme Buffer Overflow")                    
+                    error_message(self.line_no,"compiler error :: Lexeme Buffer Overflow")                    
 
                 self.lexeme_buffer[self.lexeme_buffer_ptr] = match
 
@@ -107,44 +112,66 @@ class lexer():
 
                 lexeme = self.lexeme_buffer[self.lexeme_buffer_ptr]
 
+                Token.type = Token.IDENT
+                if match in Token.keywords:
+                    Token.type = Token.KEYWORD
+
+                token = Token(Token.type, match, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)
+
                 # Symbol Table Lookup and Insert
                 symbol_table_index = None
                 symbol_table_index = symbol_table.lookup(lexeme)
 
                 if (symbol_table_index == None):
-                    symbol_table_index = symbol_table.insert(lexeme, constants.ID)
+                    symbol_table_index = symbol_table.insert(lexeme, Token.ID)
                 
-                constants.token_value = symbol_table_index
+                Token.token_value = symbol_table_index
                 return constants.SYMBOL_TABLE[symbol_table_index].token
+
             
             # Operators
             elif ( char == "+"):
-                constants.token_value = constants.PLUS
+                Token.token_value = Token.PLUS
+                token = Token(Token.PLUS, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                   
                 return char 
 
             elif ( char == "-"):
-                constants.token_value = constants.MINUS
+                Token.token_value = Token.MINUS
+                token = Token(Token.MINUS, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                   
                 return char 
 
             elif ( char == "*"):
-                constants.token_value = constants.MULTIPLY
+                Token.token_value = Token.MULTIPLY
+                token = Token(Token.MULTIPLY, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                
                 return char 
 
             elif ( char == "/"):
-                constants.token_value = constants.DIVIDE
+                Token.token_value = Token.DIVIDE
+                token = Token(Token.DIVIDE, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                
                 return char
 
             # EOF
-            elif (char == constants.EOF):
-                constants.token_value = constants.EOF
-                return constants.DONE
+            elif (char == Token.EOF):
+                Token.token_value = Token.EOF
+                token = Token(Token.EOF, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                
+                return Token.DONE
 
             # All others
             else:
-                constants.token_value = constants.NONE
+                Token.token_value = Token.NONE
+                token = Token(Token.NONE, char, self.lines[self.line_no], self.line_no, self.line_pos)
+                self.tokens.append(token)                
                 return char
-        
-        return constants.EOF
+
+        token = Token(Token.EOF, char, self.lines[self.line_no], self.line_no, self.line_pos)
+        self.tokens.append(token)                
+        return Token.EOF
 
 if (__name__ == "__main__"):
     l = lexer()
