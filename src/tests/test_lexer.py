@@ -36,15 +36,15 @@ class Test_Lexer(unittest.TestCase):
 
 
     def test_01_newline(self):
-        self.lex.loadBuffer('\n')
+        self.lex.loadBuffer('\n NEWLINE')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.NEWLINE, token)
+        self.assertEqual(constants.ID, token)
 
     def test_02_White_Space(self):
         # '   '
         self.lex.loadBuffer('  whitespace ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.WHITESPACE, token)
+        self.assertEqual(constants.ID, token)
 
     def test_03_Single_Digit(self):
         # ' 1 '
@@ -74,13 +74,13 @@ class Test_Lexer(unittest.TestCase):
         # ''
         self.lex.loadBuffer(' ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.WHITESPACE, token)        
+        self.assertEqual(constants.EOF, token)        
 
     def test_08_EOF (self):
         # ''
         self.lex.loadBuffer('')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.DONE, token)        
+        self.assertEqual(constants.EOF, token)        
 
     def test_09_DIV_operators(self):
         # +, -, /, *, DIV, MOD
@@ -98,25 +98,25 @@ class Test_Lexer(unittest.TestCase):
         # +, -, /, *
         self.lex.loadBuffer('+ ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.PLUS, token)        
+        self.assertEqual('+', token)        
 
     def test_12_Minus_operators(self):
         # +, -, /, *
         self.lex.loadBuffer('- ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.MINUS, token)        
+        self.assertEqual('-', token)        
 
     def test_13_Div_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('/ ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.DIVIDE, token)        
+        self.assertEqual('/', token)        
 
     def test_14_Mult_operators(self):
         # +, -, /, *, DIV, MOD
         self.lex.loadBuffer('* ')
         token = self.lex.tokenizer()
-        self.assertEqual(constants.MULTIPLY, token)        
+        self.assertEqual('*', token)        
 
 if __name__ == '__main__':
     unittest.main()
