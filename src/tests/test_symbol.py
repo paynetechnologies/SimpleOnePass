@@ -1,30 +1,33 @@
 import unittest
-from src.Token. import Token., entry
+from src.token import Token
+from src.symbol_table import entry, symbol_table
 
 class Test_Symbol_Table(unittest.TestCase):
     """ Test Symbol_Table variables """
     
-    def setUp(self):
-        self.e = entry("lex",0)
+    @classmethod
+    def setUpClass(self):
+        symbol_table.SYMBOL_TABLE=[]
+        self.e1 = entry(token=1, value="lexeme1")
+        self.e2 = entry(token=2, value="lexeme2")
 
+    @classmethod
     def tearDown(self):
-        return super().tearDown()
-    
-    def test_01_create_entry(self):
-        self.assertEqual(self.e.lex,'lex')
-        self.assertEqual(self.e.token, 0)
+        return super().tearDown(self)
 
-    def test_02_append_entry_to_symbolTable(self):
-        Token..SYMBOL_TABLE.append(self.e)
-        print(f'\nSYMBOL_TABLE : {Token..SYMBOL_TABLE[0].lex, Token..SYMBOL_TABLE[0].token }')
-        self.assertEqual(Token..SYMBOL_TABLE[0].lex, 'lex')
-        self.assertEqual(Token..SYMBOL_TABLE[0].token, 0)
+    def test_01_append_entry_to_symbolTable(self):
+        symbol_table.SYMBOL_TABLE.append(self.e1)
+        print(f'\nSYMBOL_TABLE : {symbol_table.SYMBOL_TABLE[0].token, symbol_table.SYMBOL_TABLE[0].lexeme }')
+        self.assertEqual(symbol_table.SYMBOL_TABLE[0].token, 1)
+        self.assertEqual(symbol_table.SYMBOL_TABLE[0].lexeme, 'lexeme1')
+        symbol_table.last_entry = 0
 
-    def test_03_add_entry_to_symbolTable(self):
-        Token..SYMBOL_TABLE[0].insert = self.e
-        print(f'\nSYMBOL_TABLE : {Token..SYMBOL_TABLE[0].lex, Token..SYMBOL_TABLE[0].token }')
-        self.assertEqual(Token..SYMBOL_TABLE[0].lex, 'lex')
-        self.assertEqual(Token..SYMBOL_TABLE[0].token, 0)        
+    def test_02_add_entry_to_symbolTable(self):
+        symbol_table.addEntry(self.e2)
+        print(f'\nSYMBOL_TABLE : {symbol_table.SYMBOL_TABLE[1].token, symbol_table.SYMBOL_TABLE[1].lexeme}')
+        self.assertEqual(symbol_table.SYMBOL_TABLE[1].token, 2)        
+        self.assertEqual(symbol_table.SYMBOL_TABLE[1].lexeme, 'lexeme2')
 
 if __name__ == '__main__':
     unittest.main()
+

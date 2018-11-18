@@ -1,13 +1,13 @@
 ''' constants '''
 
-class constants:
+class xconstants:
 
     """ Global file declarations """
     
-    BUFFERSIZE   = 128
+    # BUFFERSIZE   = 128
     EOS          = '\0'
     # EOF          = '$'
-    SYMBOL_TABLE = []
+    #SYMBOL_TABLE = []
 
     # COMMENTS    = 255
     # DIV         = 256

@@ -1,5 +1,5 @@
 import sys
-from src.error import error_message
+from src.error import lex_error_message
 from src.constants import constants, entry
 from src.lexer import lexer
 from src.emitter import emit
@@ -19,7 +19,7 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
-            error_message(Token.line_no,"syntax error")
+            lex_error_message(Token.line_no,"syntax error")
 
     def parse(self):
         parser.lookahead = self.lex.tokenizer()
@@ -69,5 +69,5 @@ class parser(object):
         elif (parser.lookahead == Token.ID):
             emit(Token.ID, Token.token_value); self.match(Token.ID)
         else:
-            error_message(Token.line_no,"syntax error")
+            lex_error_message(Token.line_no,"syntax error")
 

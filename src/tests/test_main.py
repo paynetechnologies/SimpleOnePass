@@ -1,6 +1,8 @@
 import sys
+import unittest
 from src.parser import parser
 from src.init import init
+
 
 def main():
     init()
@@ -11,5 +13,6 @@ def main():
     p.parse()
 
 
+
 if __name__ == '__main__':
-    main()
+    unittest.main()

@@ -1,6 +1,8 @@
 import sys
-from src.constants import constants, entry
 
-def error_message(ln, m):
+def lex_error_message(ln, m):
     print(f'line {constants.line_no} : {m} ')
-    sys.exit()
+
+
+def general_error_message(m):
+    print(f'{m}')

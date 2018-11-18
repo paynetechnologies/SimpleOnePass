@@ -1,18 +1,20 @@
 import sys
 import string
 from src.symbol_table import symbol_table
-from src.constants import constants, entry
-from src.error import error_message
+#from src.constants import constants, entry
+from src.error import lex_error_message
 from src.token import Token
 
 
 class lexer():
-
+    
+    BUFFERSIZE   = 128
     comment_marker = '#'
     eof_marker = '$'
     newline ='\n'
     whitespace = ' \t'
     operators = ['+', '-', '/', '*', 'MOD', 'DIV']
+
 
     # STRMAX = 999 # size of lexeme list
     # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
@@ -20,12 +22,11 @@ class lexer():
 
     def __init__(self):
         
-        #self.cursor = 1 # same as ptr
         self.input_ptr = -1
         self.line_no = 0
         self.line_pos = 0
 
-        self.lexeme_buffer = [None] * constants.BUFFERSIZE
+        self.lexeme_buffer = [None] * lexer.BUFFERSIZE
         self.lexeme_buffer_ptr = -1
 
         self.token_value = None    
@@ -102,8 +103,8 @@ class lexer():
 
                 self.lexeme_buffer_ptr += 1
 
-                if (self.lexeme_buffer_ptr >= constants.BUFFERSIZE):
-                    error_message(self.line_no,"compiler error :: Lexeme Buffer Overflow")                    
+                if (self.lexeme_buffer_ptr >= lexer.BUFFERSIZE):
+                    lex_error_message(self.line_no,"compiler error :: Lexeme Buffer Overflow")                    
 
                 self.lexeme_buffer[self.lexeme_buffer_ptr] = match
 
@@ -124,10 +125,10 @@ class lexer():
                 symbol_table_index = symbol_table.lookup(lexeme)
 
                 if (symbol_table_index == None):
-                    symbol_table_index = symbol_table.insert(lexeme, Token.ID)
+                    symbol_table_index = symbol_table.insert(Token.ID, lexeme)
                 
                 Token.token_value = symbol_table_index
-                return constants.SYMBOL_TABLE[symbol_table_index].token
+                return symbol_table.SYMBOL_TABLE[symbol_table_index].token
 
             
             # Operators

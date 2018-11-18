@@ -1,6 +1,6 @@
 import unittest
-from src.lexer2 import Lexer
 from src.error import error_message
+from src.lexer2 import Lexer
 
 #import tokenize
 
@@ -21,7 +21,7 @@ class Test_Lexer2(unittest.TestCase):
             filename = "tests/tokenize-example-2.py"
             file = open(filename)
         except:       
-            error_message(f'cannot open file {"tokenize-example-2.py"}')     
+            error_message(1, f'cannot open file {"tokenize-example-2.py"}')     
             exit(self, 0)
 
         lexer = Lexer(file.read())
