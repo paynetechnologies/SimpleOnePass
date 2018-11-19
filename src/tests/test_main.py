@@ -3,14 +3,15 @@ import unittest
 from src.parser import parser
 from src.init import init
 
+class Test_Main(unittest.TestCase):
 
-def main():
-    init()
-    p = parser( 'A + B' )
-    #p = parser( 'A + B + (C * D)' )
-    #p = parser( '(A * B) + (C * D)' )
-    #p = parser( '(E + F) * (G + H)' )
-    p.parse()
+    def test_01_main():
+        init()
+        p = parser( 'A + B' )
+        #p = parser( 'A + B + (C * D)' )
+        #p = parser( '(A * B) + (C * D)' )
+        #p = parser( '(E + F) * (G + H)' )
+        p.parse()
 
 
 

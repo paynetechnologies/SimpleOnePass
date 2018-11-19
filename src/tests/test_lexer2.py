@@ -13,7 +13,7 @@ class Test_Lexer2(unittest.TestCase):
     #     for token in lexer.tokenise():
     #         print (token)
 
-    def test_02_lexer_can_read_a_file(self):
+    def test_01_lexer_can_read_a_file(self):
         try:
             #filename = "C:/Users/Howard David Payne/dev/compilers/SimpleOnePass/src/tests/tokenize-example-2.py"
             #filename = "./src/tests/tokenize-example-2.py"
@@ -21,7 +21,7 @@ class Test_Lexer2(unittest.TestCase):
             filename = "tests/tokenize-example-2.py"
             file = open(filename)
         except:       
-            error_message(1, f'cannot open file {"tokenize-example-2.py"}')     
+            lex_error_message(1, f'cannot open file {"tokenize-example-2.py"}')     
             exit(self, 0)
 
         lexer = Lexer(file.read())

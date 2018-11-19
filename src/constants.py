@@ -1,11 +1,11 @@
 ''' constants '''
 
-class xconstants:
+class constants:
 
     """ Global file declarations """
     
     # BUFFERSIZE   = 128
-    EOS          = '\0'
+    #EOS          = '\0'
     # EOF          = '$'
     #SYMBOL_TABLE = []
 
@@ -24,15 +24,8 @@ class xconstants:
     # DIVIDE      = 266
     # MULTIPLY    = 267
 
-    line_no=0
+    #line_no=0
 
-
-
-class entry:
-    """ a symbol table entry """
-    def __init__(self, lex, value):
-        self.token = value
-        self.lexeme = lex
 
 E = {
     "null-character":
