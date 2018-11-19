@@ -1,6 +1,5 @@
 import sys
 from src.error import lex_error_message, general_error_message
-#from src.constants import constants, entry
 
 
 class entry:
@@ -32,13 +31,13 @@ class symbol_table():
         return None
         
     @classmethod
-    def add(cls, token, value):
+    def insert(cls, token, value):
         symbol_table.last_entry += 1
         
         if (symbol_table.last_entry >= symbol_table.SYMMAX):
             general_error_message("Symbol Table Full")
        
-        new_entry = entry(value, token)
+        new_entry = entry(token, value)
         symbol_table.SYMBOL_TABLE.insert(symbol_table.last_entry, new_entry)
         return symbol_table.last_entry
 

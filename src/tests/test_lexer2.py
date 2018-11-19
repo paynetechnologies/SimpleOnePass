@@ -1,5 +1,5 @@
 import unittest
-from src.error import error_message
+from src.error import lex_error_message
 from src.lexer2 import Lexer
 
 #import tokenize

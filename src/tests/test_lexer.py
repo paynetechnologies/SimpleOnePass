@@ -1,5 +1,5 @@
 import unittest
-from src.constants import constants, entry
+from src.symbol_table import entry
 from src.lexer import lexer
 from src.init import init
 from src.token import Token

@@ -1,4 +1,4 @@
-from src.constants import constants, entry
+from src.symbol_table import symbol_table, entry
 from src.token import Token
 
 '''
@@ -32,7 +32,7 @@ def emit(t, tval):
 
     # case ID`:
     elif (t == Token.ID):
-        print(f'{constants.SYMBOL_TABLE[tval].lexeme} ')     
+        print(f'{symbol_table.SYMBOL_TABLE[tval].lexeme} ')     
 
     else:
         print(f'token {t}, tokenval {tval} ')

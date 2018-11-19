@@ -1,6 +1,6 @@
 import sys
 from src.error import lex_error_message
-from src.constants import constants, entry
+from src.symbol_table import entry
 from src.lexer import lexer
 from src.emitter import emit
 from src.token import Token
@@ -64,10 +64,12 @@ class parser(object):
             self.match(")")
 
         elif (parser.lookahead == Token.NUM):
-            emit(Token.NUM, Token.token_value) ; self.match(Token.NUM)
+            emit(Token.NUM, Token.token_value) ; 
+            self.match(Token.NUM)
 
         elif (parser.lookahead == Token.ID):
-            emit(Token.ID, Token.token_value); self.match(Token.ID)
+            emit(Token.ID, Token.token_value); 
+            self.match(Token.ID)
         else:
-            lex_error_message(Token.line_no,"syntax error")
+            lex_error_message(self.lex.line_no,"syntax error")
 

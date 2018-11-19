@@ -1,7 +1,6 @@
 import sys
 import string
-from src.symbol_table import symbol_table
-#from src.constants import constants, entry
+from src.symbol_table import symbol_table, entry
 from src.error import lex_error_message
 from src.token import Token
 

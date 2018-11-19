@@ -1,6 +1,6 @@
 import unittest
-from src.Token. import Token., entry
-from src.symbol_table import symbol_table
+from src.token import Token
+from src.symbol_table import entry, symbol_table
 
 class Test_init(unittest.TestCase):
     """ Test init """
@@ -17,24 +17,24 @@ class Test_init(unittest.TestCase):
             print (f'Token : {token} - Value : {value}')    
 
         self.symTbl = symbol_table()
-        [self.symTbl.symbol_table_insert(k, v) for k,v in Test_init.keywords.items()]
+        [self.symTbl.add(k, v) for k,v in Test_init.keywords.items()]
 
-        for sym in Token..SYMBOL_TABLE:
+        for sym in symbol_table.SYMBOL_TABLE:
             print(f'Token : {sym.token} - Value : {sym.lexeme}')
 
     def test_init_symbol_table(self):
         '''Loads keywords into SYMBOL_TABLE'''        
         [print(f'Token : {t} - Lexeme : {l}') for t, l in Test_init.keywords.items()]
         
-        self.symTbl.symbol_table_insert('MOD', 'MOD')
-        self.symTbl.symbol_table_lookup('MOD')
-        self.symTbl.symbol_table_insert('Howard', Token..ID)
-        self.symTbl.symbol_table_lookup('Howard')
-        self.symTbl.symbol_table_insert('Payne', Token..ID)    
-        self.symTbl.symbol_table_lookup('Payne')
+        self.symTbl.add('MOD', 'MOD')
+        self.symTbl.lookup('MOD')
+        self.symTbl.add('Howard', Token.ID)
+        self.symTbl.lookup('Howard')
+        self.symTbl.add('Payne', Token.ID)    
+        self.symTbl.lookup('Payne')
         print('done')
         
-        for sym in Token..SYMBOL_TABLE:
+        for sym in symbol_table.SYMBOL_TABLE:
             print(f'Token : {sym.token} - Value : {sym.lexeme}')
 
 if __name__ == '__main__':
