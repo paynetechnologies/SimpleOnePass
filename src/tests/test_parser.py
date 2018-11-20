@@ -13,7 +13,7 @@ class Test_Parser(unittest.TestCase):
         return super().tearDown()
 
 
-    def test_simple_parse(self):
+    def test_add_parse(self):
         init()
         p = parser( 'A + B' )
         p.parse()

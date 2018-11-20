@@ -15,10 +15,9 @@ class Test_Lexer2(unittest.TestCase):
 
     def test_01_lexer_can_read_a_file(self):
         try:
-            #filename = "C:/Users/Howard David Payne/dev/compilers/SimpleOnePass/src/tests/tokenize-example-2.py"
-            #filename = "./src/tests/tokenize-example-2.py"
-            #filename = "H:\repos\dev\compilers\SimpleOnePass\src\tests\tokenize-example-2.py"
-            filename = "tests/tokenize-example-2.py"
+            #home_filename = "H:\repos\dev\compilers\SimpleOnePass\src\tests\tokenize-example-2.py"
+            #work_filename = "C:/Users/Howard David Payne/dev/compilers/SimpleOnePass/src/tests/tokenize-example-2.py"
+            filename = "./tests/tokenize-example-2.py"
             file = open(filename)
         except:       
             lex_error_message(1, f'cannot open file {"tokenize-example-2.py"}')     
