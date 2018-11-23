@@ -13,7 +13,6 @@ class Test_Suite(unittest.TestCase):
     """ Suite of Test Class/Cases """
 
     def suite(self):
-        print("WHAT")
         print('suite...')
         suite = unittest.TestSuite()
         result = unittest.TestResult()
@@ -32,7 +31,7 @@ class Test_Suite(unittest.TestCase):
         # suite.addTest(Test_Parser.test_add_parse(self))
         # suite.addTest(Test_Parser.test_multiply_parse(self))
         # suite.addTest(Test_Symbol_Table.test_01_append_entry_to_symbolTable(self))                                        
-        suite.addTest(Test_Symbol_Table.test_02_add_entry_to_symbolTable(self))
+        # suite.addTest(Test_Symbol_Table.test_02_add_entry_to_symbolTable(self))
 
         runner = unittest.TextTestRunner()
         print(runner.run(suite))        

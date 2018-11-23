@@ -21,6 +21,7 @@ class Test_Lexer(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+        print('\n\nTest_Lexer')
         init.init_symbol_table()
 
     @classmethod

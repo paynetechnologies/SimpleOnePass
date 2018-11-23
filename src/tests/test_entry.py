@@ -6,6 +6,7 @@ class Test_Entry(unittest.TestCase):
     """ Test Symbol_Table variables """
 
     def setUp(self):
+        print('\n\nTest_Entry')
         return super().setUp()
 
     def tearDown(self):

@@ -7,6 +7,7 @@ class Test_Symbol_Table(unittest.TestCase):
     
     @classmethod
     def setUpClass(self):
+        print('\n\n Test_Symbol_Table')
         symbol_table.SYMBOL_TABLE=[]
         self.e1 = entry(token=1, value="lexeme1")
         self.e2 = entry(token=2, value="lexeme2")
