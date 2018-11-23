@@ -23,7 +23,7 @@ class init:
 
         #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
         for entry in symbol_table.SYMBOL_TABLE:
-            print(f'lexeme : {entry.lexeme} - token : {entry.token}') 
+            print(f'Token : {entry.token} -> Lexeme : {entry.lexeme}') 
 
     @classmethod
     def init_symboltable(cls):

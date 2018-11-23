@@ -125,8 +125,13 @@ class lexer():
 
                 if (symbol_table_index == None):
                     symbol_table_index = symbol_table.insert(Token.ID, lexeme)
-                
+                    
+                for sym in symbol_table.SYMBOL_TABLE:
+                    print(f'Token : {sym.token} - Value : {sym.lexeme}')
+
                 Token.token_value = symbol_table_index
+                print(f'\nLexer::Debug -> Token.token_value : {Token.token_value}')
+                print(f'\nLexer::Debug -> symbol_table_index : {symbol_table_index}')
                 return symbol_table.SYMBOL_TABLE[symbol_table_index].token
 
             

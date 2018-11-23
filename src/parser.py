@@ -19,7 +19,7 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
-            lex_error_message(Token.line_no,"syntax error")
+            lex_error_message(self.lex.line_no,"syntax error")
 
     def parse(self):
         parser.lookahead = self.lex.tokenizer()
