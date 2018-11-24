@@ -1,6 +1,6 @@
 import sys
 import string
-from src.symbol_table import symbol_table, entry
+from src.symbol_table import SymbolTable, Entry
 from src.error import lex_error_message
 from src.token import Token
 
@@ -16,7 +16,7 @@ class lexer():
 
 
     # STRMAX = 999 # size of lexeme list
-    # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
+    # self.lexemes = ['' for i in range(SymbolTable.STRMAX)]
     # self.last_char = -1 # last used position in lexemes
 
     def __init__(self):
@@ -121,16 +121,13 @@ class lexer():
 
                 # Symbol Table Lookup and Insert
                 symtbl_index = None
-                symtbl_index = symbol_table.lookup(lexeme)
+                symtbl_index = SymbolTable.lookup(lexeme)
 
                 if (symtbl_index == None):
-                    symtbl_index = symbol_table.insert(Token.ID, lexeme)
+                    symtbl_index = SymbolTable.add(Token.ID, lexeme)
 
-                # print('\nSymbol Table')
-                # print(f'symbol_table_index :: {symtbl_index}')
-                # print(f'symbol_table_token :: {symbol_table.SYMBOL_TABLE[symtbl_index].token}')
-                # print(f'symbol_table_lexeme:: {symbol_table.SYMBOL_TABLE[symtbl_index].lexeme}')
-                return symbol_table.SYMBOL_TABLE[symtbl_index].token
+                Token.token_value = symtbl_index #token value is the index into the symbol table via emitter
+                return SymbolTable.symbol_table[symtbl_index].token
 
             
             # Operators

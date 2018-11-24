@@ -7,7 +7,7 @@ class constants:
     # BUFFERSIZE   = 128
     #EOS          = '\0'
     # EOF          = '$'
-    #SYMBOL_TABLE = []
+    #symbol_table = []
 
     # COMMENTS    = 255
     # DIV         = 256

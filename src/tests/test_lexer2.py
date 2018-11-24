@@ -1,19 +1,16 @@
 import sys
 import os
-
-
 import unittest
 from src.error import lex_error_message
 from src.lexer2 import Lexer
 
-#import tokenize
 
 
 class Test_Lexer2(unittest.TestCase):
     """ Test lexer2 variables """
 
     def setUp(self):
-        print('\n\nTest_Lexer2')
+        print('\n\n*** Test_Lexer2')
         
     # def test_01_lexer_can_read_a_string(self):
     #     lexer = Lexer('a = b * 2')

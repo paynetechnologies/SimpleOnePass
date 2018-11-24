@@ -1,6 +1,6 @@
 import sys
 from src.error import lex_error_message
-from src.symbol_table import entry
+from src.symbol_table import Entry
 from src.lexer import lexer
 from src.emitter import emit
 from src.token import Token

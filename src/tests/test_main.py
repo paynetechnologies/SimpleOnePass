@@ -6,7 +6,7 @@ from src.init import init
 class Test_Main(unittest.TestCase):
 
     def test_01_main(self):
-        print('\n\nTest_Main')
+        print('\n\n*** Test_Main')
         pass
         #init()
         p = parser( 'A + B' )

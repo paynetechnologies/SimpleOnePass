@@ -6,8 +6,8 @@ from src.init import init
 class Test_Parser(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        print('\n\nTest_Parser')
+    def setUpClass(cls): 
+        print('\n\n*** Test_Parser') 
         init.init_symbol_table()
 
     @classmethod

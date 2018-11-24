@@ -1,6 +1,6 @@
 import unittest
 from src.constants import constants
-from src.symbol_table import entry, symbol_table
+from src.symbol_table import Entry, SymbolTable
 
 class Test_Constants(unittest.TestCase):
     """ Test global variables """

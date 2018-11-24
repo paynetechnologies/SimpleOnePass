@@ -1,9 +1,9 @@
 import sys
 import src.error
-from src.symbol_table import symbol_table, entry
+from src.symbol_table import SymbolTable, Entry
 from src.token import Token
 
-keywords = {'DIV' : Token.DIV, 'MOD' : Token.MOD}
+keywords = {Token.DIV : 'DIV' , Token.MOD : 'MOD'}
 
 class init:
     def __init__(self):
@@ -12,20 +12,20 @@ class init:
     @classmethod
     def clear_symbol_table(cls):
         print('\nclear_symbol_table')
-        symbol_table.SYMBOL_TABLE = []
+        SymbolTable.symbol_table = []
     
     @classmethod
     def init_symbol_table(cls):
-        '''Loads keywords into SYMBOL_TABLE'''
+        '''Loads keywords into symbol_table'''
         print('init_symbol_table')
 
-        for lex,tok in keywords.items():
-            symbol_table.insert(lex, tok) 
+        for tok, lex in keywords.items():
+            SymbolTable.add(tok, lex) 
 
-        #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
+        #constants.symbol_table = (insert(lex, tok) for lex,tok in keywords.items())
         print(f'Symbol Table Contents')
-        for entry in symbol_table.SYMBOL_TABLE:
-            print(f'Token : {entry.token} -> Lexeme : {entry.lexeme}') 
+        for Entry in SymbolTable.symbol_table:
+            print(f'Token : {Entry.token} -> Lexeme : {Entry.lexeme}') 
 
 if (__name__ == "__main__"):
     i = init()
