@@ -23,11 +23,12 @@ class symbol_table():
     @classmethod
     def lookup(cls, value):
         """ Returns postion of entry for s """
-        #for (p = last_entry; p > 0 ; p -= 1):
+        print(f'\nSymbol Table Lookup :: value {value}')
         for indx, entry in reversed(list(enumerate(symbol_table.SYMBOL_TABLE))):
             if (value == entry.lexeme):
-                print (f'indx : {indx} - entry {entry.lexeme, entry.token}')
+                print(f'index :: {indx} : value :: {value} : entry.lexeme :: {entry.lexeme}')
                 return indx
+        print(f'Symbol Table Lookup :: Not Found')                
         return None
         
     @classmethod
@@ -38,7 +39,13 @@ class symbol_table():
             general_error_message("Symbol Table Full")
        
         new_entry = entry(token, value)
+        
         symbol_table.SYMBOL_TABLE.insert(symbol_table.last_entry, new_entry)
+        print(f'Symbol Table Insert :: Index = {symbol_table.last_entry} : Token = {token} : Value = {value}')
+        # print(f'symbol_table_index :: {symbol_table.last_entry}')
+        # print(f'symbol_table_token :: {symbol_table.SYMBOL_TABLE[symbol_table.last_entry].token}')
+        # print(f'symbol_table_lexeme:: {symbol_table.SYMBOL_TABLE[symbol_table.last_entry].lexeme}')
+
         return symbol_table.last_entry
 
     @classmethod

@@ -11,6 +11,7 @@ class init:
 
     @classmethod
     def clear_symbol_table(cls):
+        print('\nclear_symbol_table')
         symbol_table.SYMBOL_TABLE = []
     
     @classmethod
@@ -22,13 +23,9 @@ class init:
             symbol_table.insert(lex, tok) 
 
         #constants.SYMBOL_TABLE = (insert(lex, tok) for lex,tok in keywords.items())
+        print(f'Symbol Table Contents')
         for entry in symbol_table.SYMBOL_TABLE:
             print(f'Token : {entry.token} -> Lexeme : {entry.lexeme}') 
-
-    @classmethod
-    def init_symboltable(cls):
-        init.clear_symbol_table()
-        init.init_symbol_table()
 
 if (__name__ == "__main__"):
     i = init()

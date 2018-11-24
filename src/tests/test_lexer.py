@@ -21,7 +21,8 @@ class Test_Lexer(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        print('\n\nTest_Lexer')
+        print('\n*** Test_Lexer')
+        init.clear_symbol_table()
         init.init_symbol_table()
 
     @classmethod
@@ -39,37 +40,37 @@ class Test_Lexer(unittest.TestCase):
 
 
     def test_01_newline(self):
-        self.lex.loadBuffer('\n NEWLINE')
+        self.lex.loadBuffer('\n\n\n NEWLINE')
         token = self.lex.tokenizer()
         self.assertEqual(Token.ID, token)
 
     def test_02_White_Space(self):
         # '   '
-        self.lex.loadBuffer('  whitespace ')
+        self.lex.loadBuffer('          whitespace ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.ID, token)
 
     def test_03_Single_Digit(self):
         # ' 1 '
-        self.lex.loadBuffer('1')
+        self.lex.loadBuffer(' 1 ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.NUM, token)
 
     def test_04_Multiple_Digits(self):
         # ' 123 '
-        self.lex.loadBuffer('123')
+        self.lex.loadBuffer(' 123 ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.NUM, token)
 
     def test_05_Alpha(self):
         # 'abc  '
-        self.lex.loadBuffer('abc ')
+        self.lex.loadBuffer(' abc ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.ID, token)
 
     def test_06_Alphanumeric(self):
         #  'abc123 '
-        self.lex.loadBuffer('abc123 ')
+        self.lex.loadBuffer(' abc123 ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.ID, token)
 
@@ -87,37 +88,37 @@ class Test_Lexer(unittest.TestCase):
 
     def test_09_DIV_operators(self):
         # DIV
-        self.lex.loadBuffer('DIV ')
+        self.lex.loadBuffer(' DIV ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.DIV, token)        
 
     def test_10_MOD_operators(self):
         # MOD
-        self.lex.loadBuffer('MOD ')
+        self.lex.loadBuffer(' MOD ')
         token = self.lex.tokenizer()
         self.assertEqual(Token.MOD, token)        
 
     def test_11_Plus_operators(self):
         # +
-        self.lex.loadBuffer('+ ')
+        self.lex.loadBuffer(' + ')
         token = self.lex.tokenizer()
         self.assertEqual('+', token)        
 
     def test_12_Minus_operators(self):
         # -
-        self.lex.loadBuffer('- ')
+        self.lex.loadBuffer(' - ')
         token = self.lex.tokenizer()
         self.assertEqual('-', token)        
 
     def test_13_Div_operators(self):
         # /
-        self.lex.loadBuffer('/ ')
+        self.lex.loadBuffer(' / ')
         token = self.lex.tokenizer()
         self.assertEqual('/', token)        
 
     def test_14_Mult_operators(self):
         # *
-        self.lex.loadBuffer('* ')
+        self.lex.loadBuffer(' * ')
         token = self.lex.tokenizer()
         self.assertEqual('*', token)        
 
