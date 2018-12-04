@@ -19,12 +19,15 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
-            lex_error_message(Token.line_no,"syntax error")
+            lex_error_message(Token.line_no,"match syntax error")
 
     def parse(self):
         parser.lookahead = self.lex.tokenizer()
+        
         while (parser.lookahead != Token.EOF):
             self.expr() 
+
+        # on EOF, print the tokens    
         for token in self.lex.tokens:
             print(token)
 
@@ -34,9 +37,13 @@ class parser(object):
         self.term()
         
         while(True):
+
             if (parser.lookahead == '+' or parser.lookahead == '-'):
                 t = parser.lookahead
-                self.match(t); self.term(); emit(t, Token.NONE)
+                self.match(t); 
+                self.term(); 
+                emit(t, Token.NONE)
+
             else:
                 return
 
@@ -71,5 +78,5 @@ class parser(object):
             emit(Token.ID, Token.token_value); 
             self.match(Token.ID)
         else:
-            lex_error_message(self.lex.line_no,"syntax error")
+            lex_error_message(self.lex.line_no,"factor syntax error")
 

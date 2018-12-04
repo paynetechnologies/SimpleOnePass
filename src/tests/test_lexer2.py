@@ -17,7 +17,7 @@ class Test_Lexer2(unittest.TestCase):
         try:
             #home_filename = "H:\repos\dev\compilers\SimpleOnePass\src\tests\tokenize-example-2.py"
             #work_filename = "C:/Users/Howard David Payne/dev/compilers/SimpleOnePass/src/tests/tokenize-example-2.py"
-            filename = "./tests/tokenize-example-2.py"
+            filename = "./src/tests/tokenize-example-2.py"
             file = open(filename)
         except:       
             lex_error_message(1, f'cannot open file {"tokenize-example-2.py"}')     
