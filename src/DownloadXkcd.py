@@ -30,8 +30,8 @@ while not url.endswith('#'):
         # Download and save the comic image to the hard drive with iter_content().
 
         print ('downloading image %s...' % (comicURL))
-        r = requsummests.get(comicURL)
-        r = requsummests.get(comicURL)
+        r = requests.get(comicURL)
+        r = requests.get(comicURL)
         r.raise_for_status()
 
         # save image to disk
