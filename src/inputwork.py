@@ -35,6 +35,7 @@
 '''
 import io
 import sys
+import array
 
 class Input:
 
@@ -43,6 +44,8 @@ class Input:
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
     startBuf = [None for x in range(BUFSIZE)]   # input buffer
+    startBufA = array.array('c',[None for x in range(BUFSIZE)])
+
     END = startBuf[BUFSIZE - 1]                 # startBuf[BUFSIZE-1] just past last char in buf
 
     endBuf  = END   # just past last char
