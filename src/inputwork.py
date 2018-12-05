@@ -44,7 +44,7 @@ class Input:
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
     startBuf = [None for x in range(BUFSIZE)]   # input buffer
-    startBufA = array.array('c',[None for x in range(BUFSIZE)])
+    startBufA = array.array('B',[0 for x in range(BUFSIZE)])
 
     END = startBuf[BUFSIZE - 1]                 # startBuf[BUFSIZE-1] just past last char in buf
 
@@ -65,44 +65,62 @@ class Input:
     EOF_Read    = False # end of file 
 
 
-    # Flush buffer when next passes this address
-    def DANGER():
-        return Input.endBuf - Input.MAXLOOK
+# Flush buffer when next passes this address
+def DANGER():
+    return Input.endBuf - Input.MAXLOOK
 
-    def no_more_chars():
-        return (Input.EOF_Read and Input.next >= Input.endBuf)
-
-
-    def ii_io(open_funct, close_funct, read_funct):
-        openp = open_funct
-        closep = close_funct
-        readp = read_funct
-
-    def ii_newfile(name):
-
-        fd=''
-
-        name = input if (name == '/dev/tty') else name
-
-        fd = Input.STDIN if name is None else open(name, mode='rb')
-        print(type(fd))
-
-        if Input.inpFile is not None and Input.inpFile != "STDIN":
-            Input.inpFile.close()
-
-        Input.inpFile = fd
-
-        Input.EOF_Read=0
-        Input.next = Input.END
-        Input.sMark = Input.END
-        Input.eMark = Input.END
-        Input.endBuf = Input.END
-        Input.lineNo = 1
-        Input.mLine = 1
-
-        return fd
+def no_more_chars():
+    return (Input.EOF_Read and Input.next >= Input.endBuf)
 
 
+def ii_io(open_funct, close_funct, read_funct):
+    openp = open_funct
+    closep = close_funct
+    readp = read_funct
+
+def ii_newfile(self, name):
+
+    name = input if (name == '/dev/tty') else name
+
+    fd = Input.STDIN if name is None else open(name, mode='rb')
+    print(type(fd))
+
+    if Input.inpFile is not None and Input.inpFile != "STDIN":
+        Input.inpFile.close()
+
+    Input.inpFile = fd
+
+    Input.EOF_Read=0
+    Input.next = Input.END
+    Input.sMark = Input.END
+    Input.eMark = Input.END
+    Input.endBuf = Input.END
+    Input.lineNo = 1
+    Input.mLine = 1
+
+    return fd
+
+def doStuff(chunk):
+    print(chunk)
+
+def readfile_into_buffer(filename):
+
+    fd=open(filename,'rb',Input.BUFSIZE)
+    Input.startBuf = fd.read(Input.BUFSIZE)
+
+    with open(filename, 'rb') as f:
+        for chunk in iter(lambda: f.read(Input.BUFSIZE), b''):
+            doStuff(chunk)
+
+    with open(filename, 'rb') as f:
+        while True:
+            chunk = f.read(4096)
+            if not chunk:
+                break
+            doStuff(chunk)
+
+def chunk_file(fd, chunksize=4096):
+    return iter(lambda: fd.read(chunksize), b'')                
 
 if __name__ == '__main__':
-    Input.ii_newfile("./src/tests/tokenize-example-2.py")
+    readfile_into_buffer("./src/tests/lorem_ipsum.txt")
