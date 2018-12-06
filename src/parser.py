@@ -1,6 +1,6 @@
 import sys
 from src.error import lex_error_message
-from src.symbol_table import entry
+from src.symbol_table import Entry
 from src.lexer import lexer
 from src.emitter import emit
 from src.token import Token
@@ -19,7 +19,11 @@ class parser(object):
         if (parser.lookahead == t):
             parser.lookahead = self.lex.tokenizer()
         else:
+<<<<<<< HEAD
             lex_error_message(Token.line_no,"match syntax error")
+=======
+            lex_error_message(self.lex.line_no,"syntax error")
+>>>>>>> 3a66d9c193ef95846ebb50057f7aef173e364582
 
     def parse(self):
         parser.lookahead = self.lex.tokenizer()

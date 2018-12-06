@@ -1,5 +1,5 @@
 import unittest
-from constants import constants, entry
+from constants import constants, Entry
 
 class postfixTest(unittest.TestCase):
 

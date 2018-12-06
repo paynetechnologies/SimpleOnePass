@@ -1,6 +1,6 @@
 import sys
 import string
-from src.symbol_table import symbol_table, entry
+from src.symbol_table import SymbolTable, Entry
 from src.error import lex_error_message
 from src.token import Token
 
@@ -11,12 +11,12 @@ class lexer():
     comment_marker = '#'
     eof_marker = '$'
     newline ='\n'
-    whitespace = ' \t'
+    whitespace = ' \t\n'
     operators = ['+', '-', '/', '*', 'MOD', 'DIV']
 
 
     # STRMAX = 999 # size of lexeme list
-    # self.lexemes = ['' for i in range(symbol_table.STRMAX)]
+    # self.lexemes = ['' for i in range(SymbolTable.STRMAX)]
     # self.last_char = -1 # last used position in lexemes
 
     def __init__(self):
@@ -92,11 +92,11 @@ class lexer():
 
             # alpha and alphanumeric     
             elif (char.isalpha()):
-                match = char
+                lexeme = char
                 char = self.get_next_char()
                 
                 while (char.isalnum()):
-                    match += char
+                    lexeme += char
                     char = self.get_next_char()
                 self.ungetchar()
 
@@ -105,29 +105,29 @@ class lexer():
                 if (self.lexeme_buffer_ptr >= lexer.BUFFERSIZE):
                     lex_error_message(self.line_no,"compiler error :: Lexeme Buffer Overflow")                    
 
-                self.lexeme_buffer[self.lexeme_buffer_ptr] = match
+                self.lexeme_buffer[self.lexeme_buffer_ptr] = lexeme
 
                 # create string from slice of list
                 # lexeme = ''.join(self.lexeme_buffer[:self.lexeme_buffer_ptr])
 
-                lexeme = self.lexeme_buffer[self.lexeme_buffer_ptr]
+                #lexeme = self.lexeme_buffer[self.lexeme_buffer_ptr]
 
                 Token.type = Token.IDENT
-                if match in Token.keywords:
+                if lexeme in Token.keywords:
                     Token.type = Token.KEYWORD
 
-                token = Token(Token.type, match, self.lines[self.line_no], self.line_no, self.line_pos)
+                token = Token(Token.type, lexeme, self.lines[self.line_no], self.line_no, self.line_pos)
                 self.tokens.append(token)
 
                 # Symbol Table Lookup and Insert
-                symbol_table_index = None
-                symbol_table_index = symbol_table.lookup(lexeme)
+                symtbl_index = None
+                symtbl_index = SymbolTable.lookup(lexeme)
 
-                if (symbol_table_index == None):
-                    symbol_table_index = symbol_table.insert(Token.ID, lexeme)
-                
-                Token.token_value = symbol_table_index
-                return symbol_table.SYMBOL_TABLE[symbol_table_index].token
+                if (symtbl_index == None):
+                    symtbl_index = SymbolTable.add(Token.ID, lexeme)
+
+                Token.token_value = symtbl_index #token value is the index into the symbol table via emitter
+                return SymbolTable.symbol_table[symtbl_index].token
 
             
             # Operators

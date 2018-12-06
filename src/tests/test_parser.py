@@ -6,12 +6,13 @@ from src.init import init
 class Test_Parser(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        return super().setUpClass()
+    def setUpClass(cls): 
+        print('\n\n*** Test_Parser') 
+        init.init_symbol_table()
 
-    def tearDown(self):
-        return super().tearDown()
-
+    @classmethod
+    def tearDownClass(cls):
+        init.clear_symbol_table()
 
     def test_add_parse(self):
         init()
