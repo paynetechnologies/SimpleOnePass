@@ -1,7 +1,8 @@
 import sys
 import src.error
-from src.symbol_table import SymbolTable, Entry
 from src.token import Token
+from src.symbol_table import SymbolTable, Entry
+
 
 keywords = {Token.DIV : 'DIV' , Token.MOD : 'MOD'}
 

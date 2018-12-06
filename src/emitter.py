@@ -13,7 +13,7 @@ def emit(t, tval):
     return switcher.get(t, f'token {t} tokenval {tval}')
 '''
 def emit(t, tval):
-    print(f'EEEEE emit t : {t} - tval : {tval}')
+    print(f'emit t : {t} - tval : {tval}')
     # case "+": case "-": case "*": case "/":
     if (t in ['+', '-', '/', '*']):
         print(f'{t} ')

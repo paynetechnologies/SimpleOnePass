@@ -43,8 +43,8 @@ class Input:
     MAXLEX = 1024       # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
-    startBuf = [None for x in range(BUFSIZE)]   # input buffer
-    startBufA = array.array('B',[0 for x in range(BUFSIZE)])
+    startBuf = [None for x in range(Input.BUFSIZE)]   # input buffer
+    startBufA = array.array('B',[0 for x in range(Input.BUFSIZE)])
 
     END = startBuf[BUFSIZE - 1]                 # startBuf[BUFSIZE-1] just past last char in buf
 

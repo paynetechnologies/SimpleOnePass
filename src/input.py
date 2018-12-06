@@ -45,7 +45,7 @@ def ii_newfile(name):
     name = input if (name == '/dev/tty') else name
 
     fd = STDIN if name is None else open(name, mode='rb')
-    print(type(fd)
+    print(type(fd))
 
     if inpFile is not None and inpFile != "STDIN":
         inpFile.close()
