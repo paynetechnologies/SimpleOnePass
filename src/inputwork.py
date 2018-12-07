@@ -36,6 +36,7 @@
 import io
 import sys
 import array
+import time
 
 class Input:
 
@@ -43,8 +44,8 @@ class Input:
     MAXLEX = 1024       # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
-    startBuf = [None for x in range(Input.BUFSIZE)]   # input buffer
-    startBufA = array.array('B',[0 for x in range(Input.BUFSIZE)])
+    startBuf = [None for x in range(BUFSIZE)]   # input buffer
+    startBufA = array.array('B',[0 for x in range(BUFSIZE)])
 
     END = startBuf[BUFSIZE - 1]                 # startBuf[BUFSIZE-1] just past last char in buf
 
@@ -101,26 +102,39 @@ def ii_newfile(self, name):
     return fd
 
 def doStuff(chunk):
-    print(chunk)
+    lines = chunk.split(b'\n')
+    for line in lines:
+        print(line)
 
 def readfile_into_buffer(filename):
+    t1=0
+    t2=0
+
 
     fd=open(filename,'rb',Input.BUFSIZE)
     Input.startBuf = fd.read(Input.BUFSIZE)
 
+    start = time.time()
     with open(filename, 'rb') as f:
         for chunk in iter(lambda: f.read(Input.BUFSIZE), b''):
             doStuff(chunk)
-
+    end = time.time()
+    t1 = end-start
+    
+    start = time.time()
     with open(filename, 'rb') as f:
         while True:
-            chunk = f.read(4096)
+            chunk = f.read(Input.BUFSIZE)
             if not chunk:
                 break
             doStuff(chunk)
+    end = time.time()
+    t2 = end - start
+    
+    print(f't1 - {t1} : t2  {t2}')
 
 def chunk_file(fd, chunksize=4096):
     return iter(lambda: fd.read(chunksize), b'')                
 
 if __name__ == '__main__':
-    readfile_into_buffer("./src/tests/lorem_ipsum.txt")
+    readfile_into_buffer("./src/test_files/web.config")
