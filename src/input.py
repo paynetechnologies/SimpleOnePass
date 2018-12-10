@@ -42,17 +42,17 @@ import time
 
 class Input:
 
+    EOF     = False
     MAXLOOK = 16        # max amount of lookahead
-    MAXLEX = 1024       # max lexeme size
+    MAXLEX  = 1024      # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
-    #startBuf = [None for x in range(BUFSIZE)]   # input buffer
-    startBuf = array.array('B', [0 for x in range(BUFSIZE)])
+    StartBuf = array.array('B', [0 for x in range(BUFSIZE)])
 
-    END = BUFSIZE - 1  # startBuf[BUFSIZE-1] just past last char in buf
+    END = BUFSIZE   # just past last char in buf
 
     endBuf  = END   # just past last char
-    next    = END   # next input char
+    Next    = END   # Next input char
     sMark   = END   # start of current lexeme
     eMark   = END   # end of current lexeme
     pMark   = END   # start of previous lexeme
@@ -62,9 +62,9 @@ class Input:
     STDIN = sys.stdin # default standard input
 
     inpFile     = STDIN  # input file handle
-    lineNo      = 1     # current line number
-    mLine       = 1     # Line # when mark_end() is called
-    termChar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
+    Lineno      = 1     # current line number
+    Mline       = 1     # Line # when mark_end() is called
+    Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
     EOF_Read    = False # end of file 
 
     ii_io = {}
@@ -82,7 +82,7 @@ def close_funct(fd):
     fd.close()
 
 def read_funct(fd, starting_at, need):
-    Input.startBuf = fd.read(Input.BUFSIZE)
+    Input.StartBuf = fd.read(Input.BUFSIZE)
 
 def ii_io(open_funct, close_funct, read_funct):
     Input.ii_io["openp"] = open_funct
@@ -102,7 +102,7 @@ def ii_length():
     return Input.eMark - Input.sMark
 
 def ii_lineno():
-    return Input.lineNo
+    return Input.Lineno
 
 def ii_ptext():
     return Input.pMark
@@ -114,14 +114,14 @@ def ii_plineno():
     return Input.pLineno
 
 def ll_mark_start():
-    Input.mLine = Input.lineNo
-    Input.eMark = Input.sMark = Input.next
+    Input.Mline = Input.Lineno
+    Input.eMark = Input.sMark = Input.Next
     return Input.sMark
 
 def ii_mark_end():
-    Input.mLine = Input.lineNo
-    Input.eMark = Input.next
-    return (Input.eMark)
+    Input.Mline = Input.Lineno
+    Input.eMark = Input.Next
+    return Input.eMark
 
 def ii_mark_start():
     if (Input.sMark >= Input.eMark):
@@ -130,30 +130,30 @@ def ii_mark_start():
         return ++Input.sMark
 
 def ii_to_mark():
-    Input.lineNo = Input.mLine
-    Input.next = Input.eMark
-    return (Input.next)
+    Input.Lineno = Input.Mline
+    Input.Next = Input.eMark
+    return Input.Next
 
 def ii_mark_prev():
     '''
-    Set the pMark. Note: a buffer flush wonit' go past pMark so
-    once you sevit, you must move it every time you move sMark.
+    Set the pMark. Note: a buffer flush won't go past pMark so
+    once you save it, you must move it every time you move sMark.
     This is not done automatically, since you may want to 
     remember the token before last rather than the last one.
     If ii_pmark_prev is never called, pMark is ignored, no worries;
     '''
 
     Input.pMark = Input.sMark
-    Input.pLineno = Input.lineNo
+    Input.pLineno = Input.Lineno
     Input.pLength = Input.eMark - Input.sMark
-    return (Input.pMark)
+    return Input.pMark
 
-# Flush buffer when next passes this address
+# Flush buffer when Next passes this address
 def DANGER():
     return Input.endBuf - Input.MAXLOOK
 
 def NO_MORE_CHARS():
-    return (Input.EOF_Read and Input.next >= Input.endBuf)
+    return (Input.EOF_Read and Input.Next >= Input.endBuf)
 
 
 def ii_newfile(name=None):
@@ -185,12 +185,12 @@ def ii_newfile(name=None):
         Input.inpFile = fd
         Input.EOF_Read=0
 
-        Input.next = Input.END
+        Input.Next = Input.END
         Input.sMark = Input.END
         Input.eMark = Input.END
         Input.endBuf = Input.END
-        Input.lineNo = 1
-        Input.mLine = 1
+        Input.Lineno = 1
+        Input.Mline = 1
 
     return fd
 
@@ -209,10 +209,12 @@ def readfile_into_buffer(filename):
     Input.ii_io["openp"](filename, 'rb')
 
     start = time.time()
+
     with open(filename, 'rb') as f:
         for chunk in iter(lambda: f.read(Input.BUFSIZE), b''):
             doStuff(chunk)
     end = time.time()
+
     t1 = end-start
     print(f't1 - {t1}')
     '''
@@ -234,20 +236,20 @@ def chunk_file(fd, chunksize=Input.BUFSIZE):
 
 def ii_advance():
     '''
-    ii_advance is the real input function. It returns the next character
+    ii_advance is the real input function. It returns the Next character
     from input and advances past it. The buffer is flushed if the current
-    character is within MAXLOOK characters of the endo fhte buffer. 0 is
+    character is within MAXLOOK characters of the end of the buffer. 0 is
     returned at the end of file. -1 returned if the buffer can't be flushed
     because it's too full. In this case, you can call ii_flush(1) to do a
-    buffer flush bug you'll lose the curent lexeme as a result.
+    buffer flush but you'll lose the curent lexeme as a result.
     '''
     if (not Input.been_called):
         # push a newline on the empty buffer so LEX start-of-line
         # will work on the first input line.
-        Input.next = Input.sMark = Input.eMark = Input.END - 1
-        Input.startBuf[Input.next]  = '\n'
-        Input.lineNo -= 1
-        Input.mLine -= 1
+        Input.Next = Input.sMark = Input.eMark = Input.END - 1
+        Input.StartBuf[Input.Next]  = '\n'
+        Input.Lineno -= 1
+        Input.Mline -= 1
         Input.been_called = True
 
     if (NO_MORE_CHARS()):
@@ -256,15 +258,16 @@ def ii_advance():
     if (not Input.EOF_Read and (ii_flush(0) < 0)):
         return -1
 
-    if (Input.next == '\n'):
-        Input.lineNo += 1
+    if (Input.Next == '\n'):
+        Input.Lineno += 1
 
-    Input.next +=1
-    return (Input.startBuf[Input.Next])
+    Input.Next +=1
+    return (Input.StartBuf[Input.Next])
+
 
 def ii_flush(force):
     '''
-    Flush the input buffer. Do nothing if th ecurrent input characters isn't
+    Flush the input buffer. Do nothing if the current input characters isn't
     in the danger zone, otherwise move all unread characters to the left end
     of the buffer and fill the remainder of the buffer. Note that input()
     flushes the buffer willy-nilly if you read past the end of buffer.
@@ -275,7 +278,7 @@ def ii_flush(force):
    |        |     |            |     |         |    |   |
    v        v     v            v     v         v    v   v 
    +-------------------------------------------+---+---+
-   | this is already read | to be read next    | waste |
+   | this is already read | to be read Next    | waste |
    |-------------------------------------------|-------|
    |<------ shift_amt --->|<----copy_amt------>|       |
    |                                                   |
@@ -296,13 +299,10 @@ def ii_flush(force):
     if (Input.EOF_Read):    # nothing more to read
         return 1
 
-    if (Input.next >= DANGER() or force):
-        if (Input.pMark > 0):
-            left_edge =  min(Input.sMark, Input.pMark)
-        else:
-            left_edge = Input.sMark
+    if (Input.Next >= DANGER() or force):
 
         left_edge = min(Input.sMark, Input.pMark) if Input.pMark else Input.sMark
+        shift_amt = left_edge - Input.StartBuf
 
         if (shift_amt < Input.MAXLEX): # if not enough room 
             if (not force):
@@ -310,14 +310,13 @@ def ii_flush(force):
 
             left_edge = ii_mark_start() # reset start to current character
             ii_mark_prev()
-
-            shift_amt = left_edge - Input.startBuf
+            shift_amt = left_edge - Input.StartBuf
 
         copy_amt = Input.endBuf - left_edge
 
-        copy(Input.startBuf, left_edge, copy_amt)
+        copy(Input.StartBuf, left_edge, copy_amt)
 
-        if (not ii_fillBuf(Input.startBuf + copy_amt)):
+        if (not ii_fillBuf(Input.StartBuf + copy_amt)):
             #ferr("INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
             pass
         
@@ -326,61 +325,176 @@ def ii_flush(force):
 
         Input.sMark = shift_amt
         Input.eMark = shift_amt
-        Input.next = shift_amt
+        Input.Next = shift_amt
 
     return 1
 
-    def ii_fillBuf(starting_at):
-        '''
-        Fill the ipout buffer from starting_at to the end of the buffer.
-        The input file is not closed when EOF is reached. Buffers are read
-        in units of MAXLEX characters; it's an error if that any characters
-        cannot be read (0 is returned in this case). For example, if MAXLEX
-        is 1024, then 1024 characters will be read at a time. The number of
-        characters read is returned. Eof_read is true as soon as the last
-        buffer is read.
+def ii_fillBuf(starting_at):
+    '''
+    Fill the ipout buffer from starting_at to the end of the buffer.
+    The input file is not closed when EOF is reached. Buffers are read
+    in units of MAXLEX characters; it's an error if that any characters
+    cannot be read (0 is returned in this case). For example, if MAXLEX
+    is 1024, then 1024 characters will be read at a time. The number of
+    characters read is returned. Eof_read is true as soon as the last
+    buffer is read.
 
-        PORTABILITY NOTE: I'm assuming that the read function actually returns
-        the number of characters loaded into the buffer, and that that number 
-        will be < need only when the last chunk of the file is read. It's 
-        possible for read() to always return fewer than the number of requested 
-        characters in MS-DOS untranslated-input mode, however (if the File is opened 
-        without the O_BINARY flag). That's not a problem here because the file is 
-        opened in binary mode, but it could cause problems if you change from binary 
-        to text mode at some point.
-        '''
-        need = 0 # number of bytes needed from input
-        got = 0  # number of bytes actually read
+    PORTABILITY NOTE: I'm assuming that the read function actually returns
+    the number of characters loaded into the buffer, and that that number 
+    will be < need only when the last chunk of the file is read. It's 
+    possible for read() to always return fewer than the number of requested 
+    characters in MS-DOS untranslated-input mode, however (if the File is opened 
+    without the O_BINARY flag). That's not a problem hhere because the file is 
+    opened in binary mode, but it could cause problems if you change from binary 
+    to text mode at some point.
+    '''
+    need = 0 # number of bytes needed from input
+    got = 0  # number of bytes actually read
 
-        need = (( Input.END  - starting_at) / Input.MAXLEX) * Input.MAXLEX
+    need = (( Input.END  - starting_at) / Input.MAXLEX) * Input.MAXLEX
 
-        print(f'Reading {need} bytes \n')
+    print(f'Reading {need} bytes \n')
 
-        if (need < 0):
-            #ferr("INTERNAL ERROR (ii_filBuf( : Bad rea-request starting addr. \n")
-            pass
+    if (need < 0):
+        #ferr("INTERNAL ERROR (ii_filBuf( : Bad rea-request starting addr. \n")
+        pass
 
-        if (need == 0):
-           return 0
+    if (need == 0):
+        return 0
 
-        got = Input.ii_io["readp"](Input.inpFile, starting_at, need)
-        if (got == -1):
-            pass
-            #ferr("Can't read input file. \n")
+    got = Input.ii_io["readp"](Input.inpFile, starting_at, need)
+    if (got == -1):
+        pass
+        #ferr("Can't read input file. \n")
 
-        Input.endBuf = starting_at + got
+    Input.endBuf = starting_at + got
 
-        if (got < need):
-            Input.EOF_Read = True
+    if (got < need):
+        Input.EOF_Read = True
 
-        return got
+    return got
         
 
 def copy(buf, left, amt):
-    pass
+    for i in range(amt):
+        shiftContentsLeft(buf, left)
 
+  
+# Function to left Rotate arr[] of size n by 1*/  
+def shiftContentsLeft(arr, n): 
+    temp = arr[0] 
+    for i in range(n-1): 
+        arr[i] = arr[i + 1] 
+    arr[n-1] = temp 
+
+
+def ii_look(n):
+    '''
+    Return the nth character of lookahead, EOF if you try to look past
+    end of file, or 0 if you try to look past either end of the buffer.
+    '''
+    p = None
+    p = Input.Next + (n - 1)
+
+    if (not Input.EOF_Read and p >= Input.endBuf):
+        Input.EOF = True
+        return Input.EOF
+
+    return 0 if (p < Input.StartBuf or p >= Input.endBuf) else Input.StartBuf[p]
+
+def ii_pushback(n):
+    '''
+    Push n characters back into the input. You can't push past the current
+    sMark. You can, however, push back characters after end of file has
+    been encountered.
+    '''
+    n -= 1
+    while ( n >= 0 and Input.Next > Input.sMark):
+        
+        if( Input.StartBuf[Input.Next] == '\n' or Input.Next == 0):
+            Input.Lineno -= 1
+
+        if (Input.Next < Input.eMark):
+            Input.eMark =  Input.Next
+            Input.Mline = Input.Lineno
+
+        n -= 1
+
+    return( Input.Next > Input.sMark )    
+
+def ii_term():
+    Input.Termchar = Input.StartBuf[Input.Next]
+    Input.StartBuf[Input.Next] = '\0'
+
+def ii_unterm():
+    if( Input.Termchar):
+        Input.StartBuf[Input.Next] = Input.Termchar;
+        Input.Termchar = 0
+
+def ii_input():
+    rval = None
+    
+    if(Input.Termchar):
+        ii_unterm()
+        rval = ii_advance()
+        ii_mark_end()
+        ii_term()
+    else:
+        rval = ii_advance()
+        ii_mark_end ()
+    return rval
+
+def ii_unput(c):
+
+    if(Input.Termchar):
+        ii_unterm()
+        if( ii_pushback(1) ):
+            Input.StartBuf[Input.Next] = c
+            ii_term()
+    else:
+        if( ii_pushback(1)):
+            Input.StartBuf[Input.Next] = c
+
+def ii_lookahead( n ):
+    return Input.Termchar if (n == 1 and Input.Termchar is not None) else ii_look(n)
+
+def ii_flushbuf():
+    if (Input.Termchar is not None):    
+        ii_unterm()
+    return ii_flush(1)
+
+
+
+#################################################
+# Python3 program to rotate an array by  
+# d elements  
+# Function to left rotate arr[] of size n by d*/ 
+def leftRotate(arr, d, n): 
+    for i in range(d): 
+        leftRotatebyOne(arr, n) 
+  
+# Function to left Rotate arr[] of size n by 1*/  
+def leftRotatebyOne(arr, n): 
+    temp = arr[0] 
+    for i in range(n-1): 
+        arr[i] = arr[i + 1] 
+    arr[n-1] = temp 
+          
+# utility function to print an array */ 
+def printArray(arr, size): 
+    for i in range(size): 
+        print ("% d"% arr[i], end =" ") 
+  
+
+  
 
 if __name__ == '__main__':
     #readfile_into_buffer("./test_files/web.config") #python input.py
     #readfile_into_buffer("./src/test_files/web.config") #DEBUG
-    ii_newfile('./src/test_files/web.config') 
+    #ii_newfile('./src/test_files/web.config') 
+       
+    # Driver program to test above functions */ 
+    arr = array.array('B', [x for x in range(10)])
+    #arr = [1, 2, 3, 4, 5, 6, 7] 
+    leftRotate(arr, 2, 7) 
+    printArray(arr, 7) 
