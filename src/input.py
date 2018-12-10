@@ -84,7 +84,8 @@ def close_funct(fd):
 def read_funct(fd, starting_at, need):
     #Input.StartBuf = fd.read(Input.BUFSIZE)
     bytesToRead = fd.seek(need, starting_at)
-    Input.StartBuf = fd.read(bytesToRead)
+    #Input.StartBuf = fd.read(bytesToRead)
+    Input.StartBuf.fromfile(Input.inpFile, bytesToRead)
     print(Input.StartBuf)
     return bytesToRead
 
@@ -256,7 +257,7 @@ def ii_advance():
         # push a newline on the empty buffer so LEX start-of-line
         # will work on the first input line.
         Input.Next = Input.sMark = Input.eMark = Input.END - 1
-        Input.StartBuf[Input.Next]  = b'\n'
+        Input.StartBuf.insert(Input.Next, '\n')
         Input.Lineno -= 1
         Input.Mline -= 1
         Input.been_called = True
