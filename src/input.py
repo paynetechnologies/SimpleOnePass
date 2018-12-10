@@ -82,7 +82,11 @@ def close_funct(fd):
     fd.close()
 
 def read_funct(fd, starting_at, need):
-    Input.StartBuf = fd.read(Input.BUFSIZE)
+    #Input.StartBuf = fd.read(Input.BUFSIZE)
+    bytesToRead = fd.seek(need, starting_at)
+    Input.StartBuf = fd.read(bytesToRead)
+    print(Input.StartBuf)
+    return bytesToRead
 
 def ii_io(open_funct, close_funct, read_funct):
     Input.ii_io["openp"] = open_funct
@@ -155,11 +159,13 @@ def DANGER():
 def NO_MORE_CHARS():
     return (Input.EOF_Read and Input.Next >= Input.endBuf)
 
-
+#---------------------------------------------------
+#                      Open Read File
+#---------------------------------------------------
 def ii_newfile(name=None):
     '''
     Prepare a new iput file for reading. If newfile() isn't called before
-    input() or input_line() then stdin is used. The current inpout file is
+    input() or input_line() then stdin is used. The current input file is
     closed after successfully opening the new one (but stdin is not closed.)
     
     Return -1 if the file can't be opened, otherwise, return the file
@@ -176,6 +182,7 @@ def ii_newfile(name=None):
     name = input if (name == '/dev/tty') else name
 
     fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb')
+
     if(fd != 0):   
         print(type(fd))
 
@@ -183,14 +190,14 @@ def ii_newfile(name=None):
             Input.ii_io["closep"](Input.inpFile)
 
         Input.inpFile = fd
-        Input.EOF_Read=0
+        Input.EOF_Read = False
 
-        Input.Next = Input.END
-        Input.sMark = Input.END
-        Input.eMark = Input.END
-        Input.endBuf = Input.END
-        Input.Lineno = 1
-        Input.Mline = 1
+        Input.Next      = Input.END
+        Input.sMark     = Input.END
+        Input.eMark     = Input.END
+        Input.endBuf    = Input.END
+        Input.Lineno    = 1
+        Input.Mline     = 1
 
     return fd
 
@@ -198,8 +205,7 @@ def doStuff(chunk):
     lines = chunk.split(b'\n')
     for line in lines:
         print(line)
-
-    
+   
 def readfile_into_buffer(filename):
     t1=0
     #t2=0
@@ -234,6 +240,9 @@ def readfile_into_buffer(filename):
 def chunk_file(fd, chunksize=Input.BUFSIZE):
     return iter(lambda: fd.read(chunksize), b'')      
 
+#---------------------------------------------------
+#                      Advance Flush Fill 
+#---------------------------------------------------
 def ii_advance():
     '''
     ii_advance is the real input function. It returns the Next character
@@ -247,7 +256,7 @@ def ii_advance():
         # push a newline on the empty buffer so LEX start-of-line
         # will work on the first input line.
         Input.Next = Input.sMark = Input.eMark = Input.END - 1
-        Input.StartBuf[Input.Next]  = '\n'
+        Input.StartBuf[Input.Next]  = b'\n'
         Input.Lineno -= 1
         Input.Mline -= 1
         Input.been_called = True
@@ -263,7 +272,6 @@ def ii_advance():
 
     Input.Next +=1
     return (Input.StartBuf[Input.Next])
-
 
 def ii_flush(force):
     '''
@@ -331,7 +339,7 @@ def ii_flush(force):
 
 def ii_fillBuf(starting_at):
     '''
-    Fill the ipout buffer from starting_at to the end of the buffer.
+    Fill the input buffer from starting_at to the end of the buffer.
     The input file is not closed when EOF is reached. Buffers are read
     in units of MAXLEX characters; it's an error if that any characters
     cannot be read (0 is returned in this case). For example, if MAXLEX
@@ -351,7 +359,7 @@ def ii_fillBuf(starting_at):
     need = 0 # number of bytes needed from input
     got = 0  # number of bytes actually read
 
-    need = (( Input.END  - starting_at) / Input.MAXLEX) * Input.MAXLEX
+    need = int((( Input.END  - starting_at) / Input.MAXLEX) * Input.MAXLEX)
 
     print(f'Reading {need} bytes \n')
 
@@ -363,9 +371,10 @@ def ii_fillBuf(starting_at):
         return 0
 
     got = Input.ii_io["readp"](Input.inpFile, starting_at, need)
-    if (got == -1):
+    if (got == None):
         pass
-        #ferr("Can't read input file. \n")
+        print(f"Can't read input file. \n")
+        return -1
 
     Input.endBuf = starting_at + got
 
@@ -374,11 +383,12 @@ def ii_fillBuf(starting_at):
 
     return got
         
-
+#---------------------------------------------------
+#                      Copy Shift
+#---------------------------------------------------
 def copy(buf, left, amt):
     for i in range(amt):
         shiftContentsLeft(buf, left)
-
   
 # Function to left Rotate arr[] of size n by 1*/  
 def shiftContentsLeft(arr, n): 
@@ -387,7 +397,9 @@ def shiftContentsLeft(arr, n):
         arr[i] = arr[i + 1] 
     arr[n-1] = temp 
 
-
+#---------------------------------------------------
+#                      LookAhead PushBack
+#---------------------------------------------------
 def ii_look(n):
     '''
     Return the nth character of lookahead, EOF if you try to look past
@@ -422,6 +434,9 @@ def ii_pushback(n):
 
     return( Input.Next > Input.sMark )    
 
+#---------------------------------------------------
+#                      Terminate Unterminate
+#---------------------------------------------------
 def ii_term():
     Input.Termchar = Input.StartBuf[Input.Next]
     Input.StartBuf[Input.Next] = '\0'
@@ -491,10 +506,14 @@ def printArray(arr, size):
 if __name__ == '__main__':
     #readfile_into_buffer("./test_files/web.config") #python input.py
     #readfile_into_buffer("./src/test_files/web.config") #DEBUG
-    #ii_newfile('./src/test_files/web.config') 
-       
+    
+    ii_io(open_funct, close_funct, read_funct)
+    ii_newfile('./src/test_files/web.config') 
+    ii_fillBuf(0)
+    ii_advance()
+
     # Driver program to test above functions */ 
-    arr = array.array('B', [x for x in range(10)])
-    #arr = [1, 2, 3, 4, 5, 6, 7] 
-    leftRotate(arr, 2, 7) 
-    printArray(arr, 7) 
+    # arr = array.array('B', [x for x in range(10)])
+    # #arr = [1, 2, 3, 4, 5, 6, 7] 
+    # leftRotate(arr, 2, 7) 
+    # printArray(arr, 7) 
