@@ -45,9 +45,9 @@ class Input:
     EOF     = False
     MAXLOOK = 16        # max amount of lookahead
     MAXLEX  = 1024      # max lexeme size
-    BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
+    BUFSIZE = 10 #(MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
 
-    StartBuf = array.array('B', [0 for x in range(BUFSIZE)])
+    StartBuf = array.array('B') #, [0 for x in range(BUFSIZE)])
 
     END = BUFSIZE   # just past last char in buf
 
@@ -74,20 +74,25 @@ class Input:
 #---------------------------------------------------
 #                      I/O
 #---------------------------------------------------
-def open_funct(filename, mode):
-    fd=open(filename,mode)
+def open_funct(filename, mode, encoding=None):
+    fd=open(filename, mode, encoding=encoding)
     return fd
 
 def close_funct(fd):
     fd.close()
 
 def read_funct(fd, starting_at, need):
-    #Input.StartBuf = fd.read(Input.BUFSIZE)
-    bytesToRead = fd.seek(need, starting_at)
-    #Input.StartBuf = fd.read(bytesToRead)
-    Input.StartBuf.fromfile(Input.inpFile, bytesToRead)
-    print(Input.StartBuf)
-    return bytesToRead
+    fd.seek(starting_at, 1)
+    Input.StartBuf = fd.read(need)
+    print(f'Input.StartBuf : {Input.StartBuf}')
+
+    # if using array.array
+    #Input.StartBuf.fromfile(fd, need)
+    #print(f'{chr(c) for c in Input.StartBuf}')
+    #for c in Input.StartBuf:
+    #     print (f'{chr(c)}')
+    #print(f'Input.StartBUf Type {type(Input.StartBUf)}')
+    return need
 
 def ii_io(open_funct, close_funct, read_funct):
     Input.ii_io["openp"] = open_funct
@@ -99,6 +104,7 @@ def ii_io(open_funct, close_funct, read_funct):
 #---------------------------------------------------
 #                      Access
 #---------------------------------------------------
+
 
 def ii_text():
     return Input.sMark
@@ -182,7 +188,9 @@ def ii_newfile(name=None):
 
     name = input if (name == '/dev/tty') else name
 
-    fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb')
+    fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'r', 'utf-8')
+    #binary
+    #fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb', )
 
     if(fd != 0):   
         print(type(fd))
@@ -213,11 +221,11 @@ def readfile_into_buffer(filename):
 
     ii_io(open_funct, close_funct, read_funct)
 
-    Input.ii_io["openp"](filename, 'rb')
+    Input.ii_io["openp"](filename, 'r')
 
     start = time.time()
 
-    with open(filename, 'rb') as f:
+    with open(filename, 'r') as f:
         for chunk in iter(lambda: f.read(Input.BUFSIZE), b''):
             doStuff(chunk)
     end = time.time()
@@ -254,10 +262,18 @@ def ii_advance():
     buffer flush but you'll lose the curent lexeme as a result.
     '''
     if (not Input.been_called):
-        # push a newline on the empty buffer so LEX start-of-line
-        # will work on the first input line.
+        '''
+        push a newline on the empty buffer so LEX start-of-line
+        will work on the first input line.
+        '''
         Input.Next = Input.sMark = Input.eMark = Input.END - 1
-        Input.StartBuf.insert(Input.Next, '\n')
+        
+        # str
+        Input.StartBuf[Input.Next] = '\n'
+        
+        # byte array 
+        # Input.StartBuf.insert(Input.Next, ord('\n'))
+
         Input.Lineno -= 1
         Input.Mline -= 1
         Input.been_called = True
