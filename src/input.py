@@ -1,3 +1,4 @@
+
 '''                                               EndBuf       
    Start_buf                                DANGER  |  END
    | Next                                      |    |   |
@@ -23,7 +24,7 @@
    |<------------------- BUFSIZE --------------------->|
 '''
 '''                                              
-   Start_buf                            DANGER          END
+   Start_buf                            DANGER         END
    |                           Next       |   EndBuf    |
    v                            |         |     |       |
    pmark    smark       emark   |         |     v       v
@@ -64,15 +65,12 @@ class Input:
     Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
 
     been_called = True
-    EOF         = True
+    EOF         = True  # constant
     EOF_Read    = False 
     ''' 
     End of file has been read. It's possible for this to be true 
     and for characters to still be in the input buffer.
     '''
-
-    #DANGER = EndBuf - MAXLOOK                   # Flush buffer when Next passes this address
-    #NO_MORE_CHARS = EOF_Read and Next >= EndBuf
 
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
@@ -379,8 +377,9 @@ def ii_advance():
         # if *Next = '\n' or Input.membuf[Input.Next] = '\n'
         Input.Lineno += 1
 
+    c = Input.StartBuf[Input.Next]
     Input.Next +=1
-    return (Input.StartBuf[Input.Next])
+    return (c)
 
 
 def ii_flush(force):
@@ -412,7 +411,7 @@ def ii_flush(force):
     copy_amt = shift_amt = 0
     left_edge = None
 
-    if (Input.NO_MORE_CHARS()):
+    if (NO_MORE_CHARS()):
         return 0
 
     if (Input.EOF_Read):    # nothing more to read
@@ -422,7 +421,7 @@ def ii_flush(force):
 
         left_edge = min(Input.sMark, Input.pMark) if Input.pMark else Input.sMark
         
-        shift_amt = left_edge - 1 # if using pointers: shift_amt = left_edge - Input.StartBuf
+        shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - Input.StartBuf
 
         #---------------------------------------------------
         # Test to see that there will be enough room after the move to load a new 
@@ -454,7 +453,7 @@ def ii_flush(force):
         copy(Input.StartBuf, left_edge, copy_amt)
 
         #if (not ii_fillBuf(Input.StartBuf + copy_amt)): # if using pointers: Input.StartBuf is 1
-        if (not ii_fillBuf(1 + copy_amt)): 
+        if (not ii_fillBuf(0 + copy_amt)): 
             #ferr("INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
             pass
         
@@ -558,7 +557,7 @@ def ii_look(n):
     p = None
     p = Input.Next + (n - 1)
 
-    if (not Input.EOF_Read and p >= Input.EndBuf):
+    if (Input.EOF_Read and p >= Input.EndBuf):
         return Input.EOF
 
     return 0 if (p < Input.StartBuf or p >= Input.EndBuf) else Input.StartBuf[p]
@@ -701,10 +700,11 @@ if __name__ == '__main__':
     ii_io(open_funct, close_funct, read_funct)
     #ii_newfile('./src/test_files/web.config') 
     ii_newfile('./src/test_files/abcdefg.txt') 
-    ii_fillBuf(0)
-    for i in range(10):
+    c = ii_advance()
+    print(f'c : {chr(c)}')
+    while Input.EOF_Read:        
         c= ii_advance()
-        print(f'c : {c}')
+        print(f'c : {chr(c)}')
 
     # Driver program to test above functions */ 
     # arr = array.array('B', [x for x in range(10)])
