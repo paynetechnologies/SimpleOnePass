@@ -42,16 +42,13 @@ import time
 
 class Input:
 
-    EOF     = False
-    MAXLOOK = 16        # max amount of lookahead
-    MAXLEX  = 1024      # max lexeme size
-    BUFSIZE = 10 #(MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
+    MAXLOOK = 16                                # max amount of lookahead
+    MAXLEX  = 1024                              # max lexeme size
+    BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
+    StartBuf = array.array('B')                 #, [0 for x in range(BUFSIZE)]) # StartBuf = ['' for x in range(BUFSIZE)]
+    END = BUFSIZE                               # just past last char in buf
 
-    StartBuf = array.array('B') #, [0 for x in range(BUFSIZE)])
-
-    END = BUFSIZE   # just past last char in buf
-
-    endBuf  = END   # just past last char
+    EndBuf  = END   # logical buffer end...just past last char
     Next    = END   # Next input char
     sMark   = END   # start of current lexeme
     eMark   = END   # end of current lexeme
@@ -65,15 +62,31 @@ class Input:
     Lineno      = 1     # current line number
     Mline       = 1     # Line # when mark_end() is called
     Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
-    EOF_Read    = False # end of file 
 
-    ii_io = {}
+    been_called = True
+    EOF         = True
+    EOF_Read    = False 
+    ''' 
+    End of file has been read. It's possible for this to be true 
+    and for characters to still be in the input buffer.
+    '''
 
-    been_called = False
+    #DANGER = EndBuf - MAXLOOK                   # Flush buffer when Next passes this address
+    #NO_MORE_CHARS = EOF_Read and Next >= EndBuf
+
+    ii_io = {}                                  # pointers to Open, Read, Close functions
+
 
 #---------------------------------------------------
 #                      I/O
 #---------------------------------------------------
+# Flush buffer when Next passes this address
+def DANGER():
+   return Input.EndBuf - Input.MAXLOOK
+
+def NO_MORE_CHARS():
+    return (Input.EOF_Read and Input.Next >= Input.EndBuf)
+
 def open_funct(filename, mode, encoding=None):
     fd=open(filename, mode, encoding=encoding)
     return fd
@@ -83,18 +96,29 @@ def close_funct(fd):
 
 def read_funct(fd, starting_at, need):
     fd.seek(starting_at, 1)
-    Input.StartBuf = fd.read(need)
-    print(f'Input.StartBuf : {Input.StartBuf}')
+    #str
+    #Input.StartBuf = fd.read(need)
+    #print(f'Input.StartBuf : {Input.StartBuf}')
 
     # if using array.array
-    #Input.StartBuf.fromfile(fd, need)
-    #print(f'{chr(c) for c in Input.StartBuf}')
-    #for c in Input.StartBuf:
+    try:
+        Input.StartBuf.fromfile(fd, need)
+    except EOFError:
+        Input.EOF_Read = True
+    except Exception as e :
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    got = min(fd.tell(), need)        
+    #print(f'{[chr(c) for c in Input.StartBuf]}')
+    # for c in Input.StartBuf:
     #     print (f'{chr(c)}')
-    #print(f'Input.StartBUf Type {type(Input.StartBUf)}')
-    return need
+    return got
 
 def ii_io(open_funct, close_funct, read_funct):
+    '''
+    Used to change the low-level input functions that
+    are used to open files and fill the buffer.
+    '''
     Input.ii_io["openp"] = open_funct
     Input.ii_io["closep"]= close_funct            
     Input.ii_io["readp"] = read_funct
@@ -104,70 +128,114 @@ def ii_io(open_funct, close_funct, read_funct):
 #---------------------------------------------------
 #                      Access
 #---------------------------------------------------
-
-
 def ii_text():
+    '''Pointer to current lexeme'''
     return Input.sMark
 
 def ii_length():
+    ''' lexeme length'''
     return Input.eMark - Input.sMark
 
 def ii_lineno():
+    '''line number of last char in lexeme'''
     return Input.Lineno
 
 def ii_ptext():
+    '''Pointer to previous lexeme'''
     return Input.pMark
 
 def ii_plength():
+    '''previous lexeme length'''
     return Input.pLength
 
 def ii_plineno():
+    '''line number of last char in previsous lexeme'''
     return Input.pLineno
 
-def ll_mark_start():
+def ii_mark_start():
+    '''
+    Moves the sMark to the current input position (pointed to by Next). 
+    It also makes sure that the end-of-lexeme marker (eMark) is not to 
+    the left of the start marker.
+    '''
     Input.Mline = Input.Lineno
     Input.eMark = Input.sMark = Input.Next
     return Input.sMark
 
 def ii_mark_end():
+    '''
+    Similar to ii_mark_start...
+    It also saves the current line number in Mline, because the lexical analyzer 
+    might sweep past a newline when it scans forward looking for a new lexeme. 
+    The input line number must be restored to the condition it was in before the 
+    extra newline was scanned when the analyzer returns to the previous end marker
+    '''
     Input.Mline = Input.Lineno
     Input.eMark = Input.Next
     return Input.eMark
 
-def ii_mark_start():
-    if (Input.sMark >= Input.eMark):
-        return None
-    else:
-        return ++Input.sMark
+def ii_move_start():
+    '''
+    Move the start marker one space to the right. 
+    It returns the new start marker on success, NULL if you tried to move past 
+    the end marker (sMark is not modified in this last case). 
+    '''
+    if (Input.sMark >= Input.eMark):  
+        return None  
+    else: 
+        Input.sMark += 1
+        return Input.sMark
 
 def ii_to_mark():
+    '''
+    Restores the input pointer to the last end mark
+    '''
     Input.Lineno = Input.Mline
     Input.Next = Input.eMark
     return Input.Next
 
 def ii_mark_prev():
     '''
+    Modifies the previous-lexeme marker to reference the same lexeme as the 
+    current-lexeme marker. Typically, ii_mark_prev() is called by the lexical
+    analyzer just before calling ii_mark_start() (that is, just before it begins 
+    to search for the next lexeme ).
     Set the pMark. Note: a buffer flush won't go past pMark so
     once you save it, you must move it every time you move sMark.
     This is not done automatically, since you may want to 
     remember the token before last rather than the last one.
     If ii_pmark_prev is never called, pMark is ignored, no worries;
     '''
-
     Input.pMark = Input.sMark
     Input.pLineno = Input.Lineno
     Input.pLength = Input.eMark - Input.sMark
     return Input.pMark
 
-# Flush buffer when Next passes this address
-def DANGER():
-    return Input.endBuf - Input.MAXLOOK
-
-def NO_MORE_CHARS():
-    return (Input.EOF_Read and Input.Next >= Input.endBuf)
 
 #---------------------------------------------------
 #                      Open Read File
+# The normal mechanism for opening a new input file. 
+# It is passed the file name and returns the file descriptor (not the
+# FILE pointer) for the opened file, or -1 if the file couldn't be opened. 
+# The previous input file is closed unless it was standard input. 
+# ii _new fi1e() does not actually read the first buffer; rather, it 
+# sets up the various pointers so that the buffer is loaded the first time a 
+# character is requested. This way, programs that never call ii_newfile() will
+# work successfully, getting input from standard input. The problem with this approach is
+# that you must read at least one character before you can look ahead in the input (otherwise
+# the buffer won't be initialized). If you need to look ahead before advancing, use:
+#     ii_advance(); Read first bufferfull of input 
+#     ii_pushback(l); but put back the first character 
+# The default input stream [used if ii newfile() is never called] is standard input.
+# You can reassign the input to standard input (say, after you get input from a file) 
+# by calling: ii_newfile(NULL)
+#
+# Note that the input buffer is not read by ii newfile ( ) ; rather, the various pointers
+# are initialized to point at the end of the buffer. The actual input routine (advance (), 
+# discussed below) treats this situation the same as it would the Next pointer crossing 
+# the DANGER point. It shifts the buffer's tail all the way to the left (in this case 
+# the tail is empty so no characters are shifted, but the pointers are moved), and then loads the buffer 
+# from the disk.
 #---------------------------------------------------
 def ii_newfile(name=None):
     '''
@@ -188,9 +256,19 @@ def ii_newfile(name=None):
 
     name = input if (name == '/dev/tty') else name
 
-    fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'r', 'utf-8')
+    #str
+    #fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'r', 'utf-8')
     #binary
-    #fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb', )
+    fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb', )
+    '''
+    Note that the indirect open () call uses the 'rb' BINARY input mode. A CR-LF
+    (carriage-return, linefeed) pair is not translated into a single '\n' when binary-mode
+    input is active. This behavior is desirable in most LEX applications, which treat both CR
+    and LF as white space. There's no point wasting time doing the translation. The lack of
+    translation might cause problems if you're looking for an explicit '\n' in the input,
+    though.
+    '''
+
 
     if(fd != 0):   
         print(type(fd))
@@ -204,7 +282,7 @@ def ii_newfile(name=None):
         Input.Next      = Input.END
         Input.sMark     = Input.END
         Input.eMark     = Input.END
-        Input.endBuf    = Input.END
+        Input.EndBuf    = Input.END
         Input.Lineno    = 1
         Input.Mline     = 1
 
@@ -249,6 +327,33 @@ def readfile_into_buffer(filename):
 def chunk_file(fd, chunksize=Input.BUFSIZE):
     return iter(lambda: fd.read(chunksize), b'')      
 
+def Need_Extra_newLine():     
+
+        '''
+        Push a newline on the empty buffer so LEX start-of-line
+        will work on the first input line.
+        Provided for those situations where you want an extra newline appended 
+        to the beginning of a file. LEX needs this capability for processing the 
+        start-of-line anchor-a mechanism for recognizing strings only if they appear 
+        at the far left of a line. Such strings must be preceded by a newline, so an 
+        extra newline has to be appended in front of the first line of the file; otherwise, 
+        the anchored expression wouldn't be recognized on the first line.4
+        '''
+        Input.Next = Input.sMark = Input.eMark = Input.END - 1
+        
+        # str
+        # does this add to next or end of buffer
+        # Input.StartBuf[Input.Next] + '*' #\n'
+        
+        # byte array 
+        # *Next = '\n'
+        # Input.membuf[Input.Next] = '\n'
+        Input.StartBuf.insert(Input.Next, ord('\n'))
+
+        Input.Lineno -= 1
+        Input.Mline -= 1
+        Input.been_called = True
+
 #---------------------------------------------------
 #                      Advance Flush Fill 
 #---------------------------------------------------
@@ -262,21 +367,7 @@ def ii_advance():
     buffer flush but you'll lose the curent lexeme as a result.
     '''
     if (not Input.been_called):
-        '''
-        push a newline on the empty buffer so LEX start-of-line
-        will work on the first input line.
-        '''
-        Input.Next = Input.sMark = Input.eMark = Input.END - 1
-        
-        # str
-        Input.StartBuf[Input.Next] = '\n'
-        
-        # byte array 
-        # Input.StartBuf.insert(Input.Next, ord('\n'))
-
-        Input.Lineno -= 1
-        Input.Mline -= 1
-        Input.been_called = True
+        Need_Extra_newLine()
 
     if (NO_MORE_CHARS()):
         return 0
@@ -284,11 +375,13 @@ def ii_advance():
     if (not Input.EOF_Read and (ii_flush(0) < 0)):
         return -1
 
-    if (Input.Next == '\n'):
+    if (Input.StartBuf[Input.Next] == ord('\n')):
+        # if *Next = '\n' or Input.membuf[Input.Next] = '\n'
         Input.Lineno += 1
 
     Input.Next +=1
     return (Input.StartBuf[Input.Next])
+
 
 def ii_flush(force):
     '''
@@ -316,18 +409,35 @@ def ii_flush(force):
     characters already in it are discarded. Don't call this function on a 
     buffer that's been terminated by ii_term()
     '''
-    copy_amt = shift_amt = left_edge = 0
+    copy_amt = shift_amt = 0
+    left_edge = None
 
-    if (NO_MORE_CHARS()):
+    if (Input.NO_MORE_CHARS()):
         return 0
 
     if (Input.EOF_Read):    # nothing more to read
         return 1
 
-    if (Input.Next >= DANGER() or force):
+    if (Input.Next >= DANGER() or force):        
 
         left_edge = min(Input.sMark, Input.pMark) if Input.pMark else Input.sMark
-        shift_amt = left_edge - Input.StartBuf
+        
+        shift_amt = left_edge - 1 # if using pointers: shift_amt = left_edge - Input.StartBuf
+
+        #---------------------------------------------------
+        # Test to see that there will be enough room after the move to load a new 
+        # MAXLEX-sized bufferfull of characters. There might not be if the buffer contains
+        # two abnormally long lexemes. The test evaluates true if there isn't enough room.
+        # Normally, the routine returns -1 if there's no room, and 1 is returned if everything is
+        # okay. 
+        #
+        # If the force argument is true, however, the buffer is flushed even if there's no
+        # room, and 1 is returned. 
+        #
+        # The flush is forced by setting the start marker to the current
+        # input position and the left_edge of the character to be shifted to the Next pointer,
+        # effectively destroying the current lexeme.
+        #---------------------------------------------------
 
         if (shift_amt < Input.MAXLEX): # if not enough room 
             if (not force):
@@ -335,25 +445,37 @@ def ii_flush(force):
 
             left_edge = ii_mark_start() # reset start to current character
             ii_mark_prev()
-            shift_amt = left_edge - Input.StartBuf
+            shift_amt = left_edge - 1 # if using pointers: shift_amt = left_edge - Input.StartBuf
 
-        copy_amt = Input.endBuf - left_edge
+        # How many characters have to be copied (copy_ amt) 
+        # and the distance that they have to be moved (shift_amt).
+        copy_amt = Input.EndBuf - left_edge
 
         copy(Input.StartBuf, left_edge, copy_amt)
 
-        if (not ii_fillBuf(Input.StartBuf + copy_amt)):
+        #if (not ii_fillBuf(Input.StartBuf + copy_amt)): # if using pointers: Input.StartBuf is 1
+        if (not ii_fillBuf(1 + copy_amt)): 
             #ferr("INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
             pass
         
-        if (Input.pMark):
+        if (Input.pMark > 0):
             Input.pMark -= shift_amt
 
-        Input.sMark = shift_amt
-        Input.eMark = shift_amt
-        Input.Next = shift_amt
+        Input.sMark -= shift_amt
+        Input.eMark -= shift_amt
+        Input.Next -= shift_amt
 
     return 1
 
+#--------------------------------------------
+# Pass a base address, and load as many MAXLEX-sized chunks into the buffur as will fit. 
+# The need variable is the amount needed. The logical-end-of-buffer marker is adjusted 
+# Note that a single read() call does the actual read. (Readp is initialized to point 
+# at read () when it is declared up at the top of the file.) 
+# This can cause problems when a lexeme can span a line, and input is fetched
+# from a line-buffered input device (such as the console). 
+# You'll have to use ii_io() to supply an alternate read function, in this case.
+#---------------------------------------------
 def ii_fillBuf(starting_at):
     '''
     Fill the input buffer from starting_at to the end of the buffer.
@@ -364,12 +486,12 @@ def ii_fillBuf(starting_at):
     characters read is returned. Eof_read is true as soon as the last
     buffer is read.
 
-    PORTABILITY NOTE: I'm assuming that the read function actually returns
+    PORTABILITY NOTE: assuming that the read function actually returns
     the number of characters loaded into the buffer, and that that number 
     will be < need only when the last chunk of the file is read. It's 
     possible for read() to always return fewer than the number of requested 
     characters in MS-DOS untranslated-input mode, however (if the File is opened 
-    without the O_BINARY flag). That's not a problem hhere because the file is 
+    without the O_BINARY flag). That's not a problem here because the file is 
     opened in binary mode, but it could cause problems if you change from binary 
     to text mode at some point.
     '''
@@ -387,13 +509,15 @@ def ii_fillBuf(starting_at):
     if (need == 0):
         return 0
 
+    # do the read
     got = Input.ii_io["readp"](Input.inpFile, starting_at, need)
+
     if (got == None):
         pass
         print(f"Can't read input file. \n")
         return -1
 
-    Input.endBuf = starting_at + got
+    Input.EndBuf = starting_at + got
 
     if (got < need):
         Input.EOF_Read = True
@@ -416,6 +540,15 @@ def shiftContentsLeft(arr, n):
 
 #---------------------------------------------------
 #                      LookAhead PushBack
+# Returns the character at Lookahead, the offset from the current character that's 
+# specified in its argument. An ii_look(0) returns the character that was returned 
+# by the most recent ii_advance() call, ii_look(l) is the following character, 
+# ii_look(-1) is the character that precedes the current one. 
+# MAXLOOK characters of lookahead are guaranteed, though fewer might be available 
+# if you're close to end of file; Similarly, lookback (with a negative offset) is
+# only guaranteed as far as the start of the buffer (the pMark or sMark, whichever is
+# smaller). Zero is returned if you try to look past end or start of the buffer, EOF if you try
+# to look past end of file.
 #---------------------------------------------------
 def ii_look(n):
     '''
@@ -425,12 +558,19 @@ def ii_look(n):
     p = None
     p = Input.Next + (n - 1)
 
-    if (not Input.EOF_Read and p >= Input.endBuf):
-        Input.EOF = True
+    if (not Input.EOF_Read and p >= Input.EndBuf):
         return Input.EOF
 
-    return 0 if (p < Input.StartBuf or p >= Input.endBuf) else Input.StartBuf[p]
+    return 0 if (p < Input.StartBuf or p >= Input.EndBuf) else Input.StartBuf[p]
 
+#------------------------------------------------
+#Pushback(n) is passed the number of characters to push back. 
+# For example, ii_pushback(5) pushes back the five most recently read characters. 
+# If you try to push past the sMark, only the characters as far as the sMark are 
+# pushed and 0 is returned (1 is returned on a successful push). If you push past the eMark, 
+# the eMark is moved back to match the current character. Unlike ungetc(), you can 
+# indeed push back characters after EOF has been reached.
+#--------------------------------------------------
 def ii_pushback(n):
     '''
     Push n characters back into the input. You can't push past the current
@@ -442,19 +582,35 @@ def ii_pushback(n):
         
         if( Input.StartBuf[Input.Next] == '\n' or Input.Next == 0):
             Input.Lineno -= 1
-
-        if (Input.Next < Input.eMark):
-            Input.eMark =  Input.Next
-            Input.Mline = Input.Lineno
-
+        
         n -= 1
+
+    if (Input.Next < Input.eMark):
+        Input.eMark =  Input.Next
+        Input.Mline = Input.Lineno
+
 
     return( Input.Next > Input.sMark )    
 
 #---------------------------------------------------
 #                      Terminate Unterminate
+# These routines are not-strictly speaking-necessary, because the lexeme 
+# length is always available. It's occasionally useful to have a terminator on the string,
+# however. Note that these functions should be used exclusively after the string has been
+# terminated-the other input functions will not work properly in this case.
+
+# This approach is better than putting the ii_unterm() code into ii_advance (),
+# because the latter approach slows down all ii _advance() calls. On the other hand,
+# you have to remember to call ii_unterm () before calling ii_advance(). For this
+# reason, an ii_input () function has been provided to make sure that the
+# lexeme is unterminated and then reterminated correctly. That is, ii_input () is a
+# well-behaved input function meant to be used directly by the user.
 #---------------------------------------------------
 def ii_term():
+    '''
+    Saves the character pointed to by Next in a variable called Termchar, 
+    and then overwrites the character with a' \0'.
+    '''
     Input.Termchar = Input.StartBuf[Input.Next]
     Input.StartBuf[Input.Next] = '\0'
 
@@ -477,7 +633,12 @@ def ii_input():
     return rval
 
 def ii_unput(c):
-
+    '''
+    Reverse-input function. It backs up the input one notch and then overwrites 
+    the character at that position with its argument. ii_unput() works correctly 
+    on both terminated and unterminated buffers, unlike ii_pushback(), which 
+    can't handle the terminator.
+    '''
     if(Input.Termchar):
         ii_unterm()
         if( ii_pushback(1) ):
@@ -487,10 +648,23 @@ def ii_unput(c):
         if( ii_pushback(1)):
             Input.StartBuf[Input.Next] = c
 
+#-------------------------------------
+# 
+#--------------------------------------
 def ii_lookahead( n ):
+    '''
+    The ii_lookahead() function bears the same relation to ii_look() that 
+    ii_input() bears to ii_advance(). That is, ii_lookahead(1) functions
+    correctly for strings that have been terminated with ii_term() calls, ii_look() 
+    does not. 
+    '''
     return Input.Termchar if (n == 1 and Input.Termchar is not None) else ii_look(n)
 
 def ii_flushbuf():
+    '''
+    ii_flushbuf() flushes a terminated buffer by unterminating 
+    it before calling ii_flush().
+    '''
     if (Input.Termchar is not None):    
         ii_unterm()
     return ii_flush(1)
@@ -525,9 +699,12 @@ if __name__ == '__main__':
     #readfile_into_buffer("./src/test_files/web.config") #DEBUG
     
     ii_io(open_funct, close_funct, read_funct)
-    ii_newfile('./src/test_files/web.config') 
+    #ii_newfile('./src/test_files/web.config') 
+    ii_newfile('./src/test_files/abcdefg.txt') 
     ii_fillBuf(0)
-    ii_advance()
+    for i in range(10):
+        c= ii_advance()
+        print(f'c : {c}')
 
     # Driver program to test above functions */ 
     # arr = array.array('B', [x for x in range(10)])
