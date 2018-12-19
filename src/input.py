@@ -38,15 +38,20 @@ import io
 import sys
 import array
 import time
-
+import string
 
 
 class Input:
+    BINARY = True
 
     MAXLOOK = 16                                # max amount of lookahead
     MAXLEX  = 1024                              # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
-    StartBuf = array.array('B')                 #, [0 for x in range(BUFSIZE)]) # StartBuf = ['' for x in range(BUFSIZE)]
+    # str
+    #StartBuf = [0 for x in range(BUFSIZE)]      # StartBuf = ['' for x in range(BUFSIZE)]
+    # array
+    StartBuf = array.array('B', [96 for x in range(BUFSIZE)]) # StartBuf = ['' for x in range(BUFSIZE)]
+    MVStartBuf = memoryview(StartBuf)
     END = BUFSIZE                               # just past last char in buf
 
     EndBuf  = END   # logical buffer end...just past last char
@@ -74,6 +79,9 @@ class Input:
 
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
+    whitespace = ' \r\t\n'
+    newline = '\n'
+    comment_marker = ['<!-']
 
 #---------------------------------------------------
 #                      I/O
@@ -83,7 +91,8 @@ def DANGER():
    return Input.EndBuf - Input.MAXLOOK
 
 def NO_MORE_CHARS():
-    return (Input.EOF_Read and Input.Next >= Input.EndBuf)
+    if (Input.EOF_Read and Input.Next >= Input.EndBuf):
+        return 
 
 def open_funct(filename, mode, encoding=None):
     fd=open(filename, mode, encoding=encoding)
@@ -93,23 +102,34 @@ def close_funct(fd):
     fd.close()
 
 def read_funct(fd, starting_at, need):
-    fd.seek(starting_at, 1)
-    #str
-    #Input.StartBuf = fd.read(need)
-    #print(f'Input.StartBuf : {Input.StartBuf}')
+    #fd.seek(starting_at, 1)
 
-    # if using array.array
+    if Input.BINARY == False:
+        print(f'Input.StartBuf : {Input.StartBuf}')
+
+    begin_seek_pos = fd.tell()
     try:
-        Input.StartBuf.fromfile(fd, need)
+        # str
+        #Input.StartBuf = fd.read(need)
+        # if using array.array
+        ##Input.StartBuf.fromfile(fd, need)
+        Input.MVStartBuf = fd.read(need)
+
     except EOFError:
         Input.EOF_Read = True
     except Exception as e :
-        print("Unexpected error:", sys.exc_info()[0])
+        print(f"Unexpected error : {e}", sys.exc_info()[0])
         raise
-    got = min(fd.tell(), need)        
-    #print(f'{[chr(c) for c in Input.StartBuf]}')
-    # for c in Input.StartBuf:
-    #     print (f'{chr(c)}')
+    
+    got = min(fd.tell() - begin_seek_pos, need)
+    
+    if Input.BINARY:
+        #print(f'{[chr(c) for c in Input.StartBuf]}')
+        #print(''.join([chr(c) for c in Input.StartBuf]))
+        print(''.join([chr(c) for c in Input.MVStartBuf]))
+    else:
+        print(f'{c for c in Input.StartBuf}')
+
     return got
 
 def ii_io(open_funct, close_funct, read_funct):
@@ -254,10 +274,11 @@ def ii_newfile(name=None):
 
     name = input if (name == '/dev/tty') else name
 
-    #str
-    #fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'r', 'utf-8')
-    #binary
-    fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb', )
+    if Input.BINARY:
+        fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'rb', )
+    else:
+        fd = Input.STDIN if name is None else Input.ii_io["openp"](name, 'r', 'utf-8')
+       
     '''
     Note that the indirect open () call uses the 'rb' BINARY input mode. A CR-LF
     (carriage-return, linefeed) pair is not translated into a single '\n' when binary-mode
@@ -290,7 +311,11 @@ def doStuff(chunk):
     lines = chunk.split(b'\n')
     for line in lines:
         print(line)
-   
+
+
+    #readfile_into_buffer("./test_files/web.config") #python input.py
+    #readfile_into_buffer("./src/test_files/web.config") #DEBUG
+
 def readfile_into_buffer(filename):
     t1=0
     #t2=0
@@ -373,11 +398,14 @@ def ii_advance():
     if (not Input.EOF_Read and (ii_flush(0) < 0)):
         return -1
 
-    if (Input.StartBuf[Input.Next] == ord('\n')):
+    #if (Input.StartBuf[Input.Next] == ord('\n')):
+    if (Input.MVStartBuf[Input.Next] == ord('\n')):        
         # if *Next = '\n' or Input.membuf[Input.Next] = '\n'
         Input.Lineno += 1
 
-    c = Input.StartBuf[Input.Next]
+    #c = Input.StartBuf[Input.Next]
+    c = Input.MVStartBuf[Input.Next]
+
     Input.Next +=1
     return (c)
 
@@ -390,10 +418,10 @@ def ii_flush(force):
     flushes the buffer willy-nilly if you read past the end of buffer.
     Similarly, input_line() flushes the buffer at the beginning of each line.
                                       
-   Start_buf                       Next      DANGER    END
-   |        pmark smark        emark |         |  EndBuf|
-   |        |     |            |     |         |    |   |
-   v        v     v            v     v         v    v   v 
+   Start_buf    pmark              DANGER              END
+   |            |smark        emark  |Next        EndBuf|
+   |            | |            |     | |            |   |
+   v            v v            v     v v            v   v 
    +-------------------------------------------+---+---+
    | this is already read | to be read Next    | waste |
    |-------------------------------------------|-------|
@@ -419,7 +447,7 @@ def ii_flush(force):
 
     if (Input.Next >= DANGER() or force):        
 
-        left_edge = min(Input.sMark, Input.pMark) if Input.pMark else Input.sMark
+        left_edge = min(Input.sMark, Input.pMark) if Input.pMark > 0 else Input.sMark
         
         shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - Input.StartBuf
 
@@ -450,12 +478,11 @@ def ii_flush(force):
         # and the distance that they have to be moved (shift_amt).
         copy_amt = Input.EndBuf - left_edge
 
-        copy(Input.StartBuf, left_edge, copy_amt)
+        copy(Input.MVStartBuf, left_edge, copy_amt)
 
         #if (not ii_fillBuf(Input.StartBuf + copy_amt)): # if using pointers: Input.StartBuf is 1
-        if (not ii_fillBuf(0 + copy_amt)): 
-            #ferr("INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
-            pass
+        if (not ii_fillBuf(copy_amt)): 
+            print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
         
         if (Input.pMark > 0):
             Input.pMark -= shift_amt
@@ -529,13 +556,16 @@ def ii_fillBuf(starting_at):
 def copy(buf, left, amt):
     for i in range(amt):
         shiftContentsLeft(buf, left)
+    printArray(buf,amt)
   
 # Function to left Rotate arr[] of size n by 1*/  
 def shiftContentsLeft(arr, n): 
-    temp = arr[0] 
+    #temp = arr[0] 
     for i in range(n-1): 
         arr[i] = arr[i + 1] 
-    arr[n-1] = temp 
+    #arr[n-1] = temp 
+
+    
 
 #---------------------------------------------------
 #                      LookAhead PushBack
@@ -674,6 +704,12 @@ def ii_flushbuf():
 # Python3 program to rotate an array by  
 # d elements  
 # Function to left rotate arr[] of size n by d*/ 
+    # Driver program to test above functions */ 
+    # arr = array.array('B', [x for x in range(10)])
+    # #arr = [1, 2, 3, 4, 5, 6, 7] 
+    # leftRotate(arr, 2, 7) 
+    # printArray(arr, 7) 
+    
 def leftRotate(arr, d, n): 
     for i in range(d): 
         leftRotatebyOne(arr, n) 
@@ -687,27 +723,80 @@ def leftRotatebyOne(arr, n):
           
 # utility function to print an array */ 
 def printArray(arr, size): 
-    for i in range(size): 
+    for i in range(size):
         print ("% d"% arr[i], end =" ") 
   
 
-  
+def skip_whitespace(c):
+    ''' [ \t\n]* '''
+    while c is not None and c.isspace():
+        c = ii_advance()
+        c = chr(c)
+
+def integer(c):
+    """Return a (multidigit) integer consumed from the input."""
+    result = ''
+    while c is not None and c.isdigit():
+        result += c
+        c = ii_advance()
+    return int(result)
+
+def printBuf():
+    print(''.join([chr(c) for c in Input.StartBuf]))
 
 if __name__ == '__main__':
-    #readfile_into_buffer("./test_files/web.config") #python input.py
-    #readfile_into_buffer("./src/test_files/web.config") #DEBUG
     
     ii_io(open_funct, close_funct, read_funct)
-    #ii_newfile('./src/test_files/web.config') 
-    ii_newfile('./src/test_files/abcdefg.txt') 
+    ii_newfile('./src/test_files/web.config') 
+    #ii_newfile('./src/test_files/abcdefg.txt') 
+    
+    i = 1
     c = ii_advance()
-    print(f'c : {chr(c)}')
-    while Input.EOF_Read:        
-        c= ii_advance()
-        print(f'c : {chr(c)}')
+    #print(f'c : {i} : {chr(c)}')
+    # binary print(chr(c))
+    print(c)
+    
+    while not NO_MORE_CHARS():
+        i+=1
+        c = ii_advance()
+        if c != -1:
+            pass
+            #print(f'c : {i} - {chr(c)}')
+            #print(chr(c))
+        elif c == -1:
+            print(f'i : {i}')
+            ii_mark_prev()
+            ii_mark_start()          
+    printBuf()
 
-    # Driver program to test above functions */ 
-    # arr = array.array('B', [x for x in range(10)])
-    # #arr = [1, 2, 3, 4, 5, 6, 7] 
-    # leftRotate(arr, 2, 7) 
-    # printArray(arr, 7) 
+    # while not NO_MORE_CHARS():
+
+    #     # ignore whitespace
+    #     if c in Input.whitespace:
+    #         if c in Input.newline:
+    #             Input.lineno += 1
+    #             Input.linepos = 0
+    #         c = chr(ii_advance())
+    #         i += 1
+    #         print(f'c : {i} - {c}')
+
+    #     # comment
+    #     elif c in Input.comment_marker:
+    #         while c not in Input.newline:
+    #             c = chr(ii_advance())
+    #             i += 1
+    #             print(f'c : {i} - {c}')
+
+
+    #     # identifier token
+    #     elif c in string.ascii_letters:
+    #         match = char
+    #         c = chr(ii_advance())
+    #         i += 1
+    #         print(f'c : {i} - {c}')
+
+    #         while char in string.ascii_letters:
+    #             match += char
+    #             c = chr(ii_advance())
+    #             i += 1
+    #             print(f'c : {i} - {c}')
