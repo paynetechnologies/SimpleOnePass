@@ -1,5 +1,5 @@
 
-'''                                               EndBuf       
+'''                                              LEndBuf       
    Start_buf                                DANGER  |  END
    | Next                                      |    |   |
    |/                                          |    |   |
@@ -14,7 +14,7 @@
 '''
 '''                                              
    Start_buf                       Next      DANGER    END
-   |     pmark    smark        emark |         |  EndBuf|
+   |     pmark    smark        emark |         | LEndBuf|
    |     |        |            |     |         |    |   |
    v     v        v            v     v         v    v   v 
    +-------------------------------------------+---+---+
@@ -25,7 +25,7 @@
 '''
 '''                                              
    Start_buf                            DANGER         END
-   |                           Next       |   EndBuf    |
+   |                           Next       |  LEndBuf    |
    v                            |         |     |       |
    pmark    smark       emark   |         |     v       v
    v--------v-----------v-------v---------v-------------
@@ -54,7 +54,7 @@ class Input:
     MVStartBuf = memoryview(StartBuf)
     END = BUFSIZE                               # just past last char in buf
 
-    EndBuf  = END   # logical buffer end...just past last char
+    LEndBuf = END   # logical buffer end...just past last char
     Next    = END   # Next input char
     sMark   = END   # start of current lexeme
     eMark   = END   # end of current lexeme
@@ -88,10 +88,10 @@ class Input:
 #---------------------------------------------------
 # Flush buffer when Next passes this address
 def DANGER():
-   return Input.EndBuf - Input.MAXLOOK
+   return Input.LEndBuf - Input.MAXLOOK
 
 def NO_MORE_CHARS():
-    if (Input.EOF_Read and Input.Next >= Input.EndBuf):
+    if (Input.EOF_Read and Input.Next >= Input.LEndBuf - 1 ):
         return 
 
 def open_funct(filename, mode, encoding=None):
@@ -301,7 +301,7 @@ def ii_newfile(name=None):
         Input.Next      = Input.END
         Input.sMark     = Input.END
         Input.eMark     = Input.END
-        Input.EndBuf    = Input.END
+        Input.LEndBuf    = Input.END
         Input.Lineno    = 1
         Input.Mline     = 1
 
@@ -371,7 +371,7 @@ def Need_Extra_newLine():
         # byte array 
         # *Next = '\n'
         # Input.membuf[Input.Next] = '\n'
-        Input.StartBuf.insert(Input.Next, ord('\n'))
+        Input.MVStartBuf[Input.Next] =  ord(b'\n')
 
         Input.Lineno -= 1
         Input.Mline -= 1
@@ -398,7 +398,6 @@ def ii_advance():
     if (not Input.EOF_Read and (ii_flush(0) < 0)):
         return -1
 
-    #if (Input.StartBuf[Input.Next] == ord('\n')):
     if (Input.MVStartBuf[Input.Next] == ord('\n')):        
         # if *Next = '\n' or Input.membuf[Input.Next] = '\n'
         Input.Lineno += 1
@@ -419,7 +418,7 @@ def ii_flush(force):
     Similarly, input_line() flushes the buffer at the beginning of each line.
                                       
    Start_buf    pmark              DANGER              END
-   |            |smark        emark  |Next        EndBuf|
+   |            |smark        emark  |Next       LEndBuf|
    |            | |            |     | |            |   |
    v            v v            v     v v            v   v 
    +-------------------------------------------+---+---+
@@ -449,7 +448,7 @@ def ii_flush(force):
 
         left_edge = min(Input.sMark, Input.pMark) if Input.pMark > 0 else Input.sMark
         
-        shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - Input.StartBuf
+        shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - 
 
         #---------------------------------------------------
         # Test to see that there will be enough room after the move to load a new 
@@ -476,7 +475,7 @@ def ii_flush(force):
 
         # How many characters have to be copied (copy_ amt) 
         # and the distance that they have to be moved (shift_amt).
-        copy_amt = Input.EndBuf - left_edge
+        copy_amt = Input.LEndBuf - left_edge
 
         copy(Input.MVStartBuf, left_edge, copy_amt)
 
@@ -543,7 +542,7 @@ def ii_fillBuf(starting_at):
         print(f"Can't read input file. \n")
         return -1
 
-    Input.EndBuf = starting_at + got
+    Input.LEndBuf = starting_at + got
 
     if (got < need):
         Input.EOF_Read = True
@@ -555,15 +554,13 @@ def ii_fillBuf(starting_at):
 #---------------------------------------------------
 def copy(buf, left, amt):
     for i in range(amt):
-        shiftContentsLeft(buf, left)
+        shiftContentsLeft(bytearray(buf), left)
     printArray(buf,amt)
   
 # Function to left Rotate arr[] of size n by 1*/  
 def shiftContentsLeft(arr, n): 
-    #temp = arr[0] 
     for i in range(n-1): 
-        arr[i] = arr[i + 1] 
-    #arr[n-1] = temp 
+         arr[i] = arr[i + 1] 
 
     
 
@@ -587,10 +584,10 @@ def ii_look(n):
     p = None
     p = Input.Next + (n - 1)
 
-    if (Input.EOF_Read and p >= Input.EndBuf):
+    if (Input.EOF_Read and p >= Input.LEndBuf):
         return Input.EOF
 
-    return 0 if (p < Input.StartBuf or p >= Input.EndBuf) else Input.StartBuf[p]
+    return 0 if (p < Input.MVStartBuf or p >= Input.LEndBuf) else Input.MVStartBuf[p]
 
 #------------------------------------------------
 #Pushback(n) is passed the number of characters to push back. 
@@ -609,7 +606,7 @@ def ii_pushback(n):
     n -= 1
     while ( n >= 0 and Input.Next > Input.sMark):
         
-        if( Input.StartBuf[Input.Next] == '\n' or Input.Next == 0):
+        if( Input.MVStartBuf[Input.Next] == '\n' or Input.Next == 0):
             Input.Lineno -= 1
         
         n -= 1
@@ -640,12 +637,12 @@ def ii_term():
     Saves the character pointed to by Next in a variable called Termchar, 
     and then overwrites the character with a' \0'.
     '''
-    Input.Termchar = Input.StartBuf[Input.Next]
-    Input.StartBuf[Input.Next] = '\0'
+    Input.Termchar = Input.MVStartBuf[Input.Next]
+    Input.MVStartBuf[Input.Next] = b'\0'
 
 def ii_unterm():
     if( Input.Termchar):
-        Input.StartBuf[Input.Next] = Input.Termchar;
+        Input.MVStartBuf[Input.Next] = Input.Termchar;
         Input.Termchar = 0
 
 def ii_input():
@@ -671,11 +668,11 @@ def ii_unput(c):
     if(Input.Termchar):
         ii_unterm()
         if( ii_pushback(1) ):
-            Input.StartBuf[Input.Next] = c
+            Input.MVStartBuf[Input.Next] = bytes(c)
             ii_term()
     else:
         if( ii_pushback(1)):
-            Input.StartBuf[Input.Next] = c
+            Input.MVStartBuf[Input.Next] = bytes(c)
 
 #-------------------------------------
 # 
@@ -742,7 +739,7 @@ def integer(c):
     return int(result)
 
 def printBuf():
-    print(''.join([chr(c) for c in Input.StartBuf]))
+    print(''.join([chr(c) for c in Input.MVStartBuf]))
 
 if __name__ == '__main__':
     
