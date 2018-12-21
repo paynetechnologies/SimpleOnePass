@@ -109,9 +109,13 @@ class CInput:
     '''
 
     eof_marker = '$'
-    whitespace = ' \t\n'
+    whitespace = ' \t\n\r'
     newline = '\n'
     comment_marker = '#'
+    LESS_THAN = '<'
+    GREATER_THAN = '<'
+    DASH = '-'
+    EXCLAMATION = '!'
 
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
@@ -759,10 +763,9 @@ if __name__ == '__main__':
 
     i = 1
     c = input.getchar()
-    print(f'{i} - {c}')
 
     while not input.NO_MORE_CHARS():
-    #     # ignore whitespace
+        # ignore whitespace
         if c in input.whitespace:
             while c in input.whitespace:
                 if c in input.newline:
@@ -784,13 +787,38 @@ if __name__ == '__main__':
                 c = input.getchar()
             print(f'comment : {match}')
 
+        # html comment <!-- -->
+        elif c in input.LESS_THAN:
+            match = c
+            i += 1                
+
+            c = input.getchar()
+            if c in input.EXCLAMATION:
+                match += c
+                i += 1
+                
+                c = input.getchar()
+                if c in input.DASH:
+                    match += c
+                    i += 1                
+
+                    c = input.getchar()
+                    if c in input.DASH:
+                        match += c
+                        i += 1      
+
+                        c = input.getchar()
+                        while c not in input.GREATER_THAN:
+                            match += c                                
+                            i += 1                
+                            c = input.getchar()
+                    print(f'HTML comment : {match}')
 
         # identifier token
         elif c.isalpha(): #in string.ascii_letters:
             match = c
             i += 1            
             c = input.getchar()
-            print(f'{i} - {c}')
 
             while c.isalnum(): #in string.ascii_letters:
                 match += c
@@ -802,21 +830,22 @@ if __name__ == '__main__':
         # number
         elif (c in string.digits):
             match = c
+            i += 1            
             #Token.token_value = int(char) - 0
             c = input.getchar()
             
             while(c in string.digits):                    
                 match += c
+                i += 1 
                 #Token.token_value = Token.token_value * 10 + int(char) - 0
                 c = input.getchar()
-            # self.ungetchar()                
-
             # token = Token(Token.NUM, char, self.lines[self.line_no], self.line_no, self.line_pos)
             # self.tokens.append(token)                   
             # return Token.NUM
             print(f'number : {match}')
 
         else:
+            print(f'{i} - {c}')            
             i += 1
             c = input.getchar()
-            print(f'{i} - {c}')
+
