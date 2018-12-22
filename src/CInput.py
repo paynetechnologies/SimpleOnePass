@@ -41,42 +41,6 @@ import string
 import base64
 
 
-# def open_funct(filename, mode, encoding=None):
-#     fd=open(filename, mode, encoding=encoding)
-#     return fd
-
-# def close_funct(fd):
-#     fd.close()
-
-# def read_funct(fd, starting_at, need):
-
-#     begin_seek_pos = fd.tell()
-
-#     try:
-#         fd.readinto(CInput.MVInputBuf[starting_at:])
-#     except EOFError:
-#         CInput.EOF_Read = True
-#     except Exception as e :
-#         print(f"Unexpected error : {e}", sys.exc_info()[0])
-#         raise
-    
-#     got = min(fd.tell() - begin_seek_pos, need)
-
-#     print(''.join([chr(c) for c in CInput.MVInputBuf]))
-
-#     return got
-
-# def ii_io(open_funct, close_funct, read_funct):
-#     '''
-#     Used to change the low-level input functions that
-#     are used to open files and fill the buffer.
-#     '''
-#     CInput.ii_io["openp"] = open_funct
-#     CInput.ii_io["closep"] = close_funct            
-#     CInput.ii_io["readp"] = read_funct
-#     print(CInput.ii_io)
-
-
 class CInput:
 
     MAXLOOK = 16                                # max amount of lookahead
@@ -120,6 +84,10 @@ class CInput:
 
     MVInputBuf = memoryview(InputBuf)           # Memoryview of Input Buffer    
 
+    def __init__(self, fileName ):
+        self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
+        self.ii_newfile(fileName)         
+        
     #---------------------------------------------------
     #                      I/O
     #---------------------------------------------------

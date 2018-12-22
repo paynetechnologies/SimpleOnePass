@@ -24,12 +24,20 @@ class Token(object):
     DIVIDE      = 'DIVIDE_OP'
     
     CONFIGURATION   = 'CONFIGURATION'
-    CONFIGURATIONS  = 'CONFIGURATIONS'
+    CONFIGURATIONS  = 'CONFIGSECTIONS'
     SECTION         = 'SECTION'
     TYPE            = 'TYPE'
     APPSETTING      = 'APPSETTING'
+    CONNECTIONSTRINGS = 'CONNECTIONSTRINGS'
+    SYSTEM_WEB = 'SYSTEM_WEB'
+    SYSTEM_WEBSERVER = 'SYSTEM_WEBSERVER'
+    SYSTEM_SERVICEMODEL = 'SYSTEM_SERVICEMODEL'
     
-    keywords    = ['if', 'else', 'elif', 'while']   
+    keywords    = ['if', 'else', 'elif', 'while']
+
+    config_keywords   = ['configuration', 'configSections', 'appSettings',
+    'connectionStrings', 'system.web', 'system.webServer', 'system.serviceModel']
+
     token_value = 0
   
 
