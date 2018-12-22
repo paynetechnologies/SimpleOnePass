@@ -51,35 +51,41 @@ class CLexer:
                 i += 1                
 
                 if (chr(input.ii_look(1)) == input.EXCLAMATION):
-                    print(f'ii_look found EXCLAMATION')
-                else:
-                    print(f'{i} - {c}')            
-                    i += 1
-                    c = input.getchar()
-                    continue
-
-
-                c = input.getchar()
-                if c in input.EXCLAMATION:
-                    match += c
-                    i += 1
-                    
-                    c = input.getchar()
-                    if c in input.DASH:
-                        match += c
-                        i += 1                
-
-                        c = input.getchar()
-                        if c in input.DASH:
-                            match += c
-                            i += 1      
-
+                    if (chr(input.ii_look(2)) == input.DASH):
+                        if (chr(input.ii_look(3)) == input.DASH):
+                            print(f'HTML Comment')
                             c = input.getchar()
                             while c not in input.GREATER_THAN:
                                 match += c                                
                                 i += 1                
                                 c = input.getchar()
-                        print(f'HTML comment : {match}')
+                            print(f'HTML comment : {match}')
+                else:
+                    print(f'{i} - {c}')            
+                    i += 1
+                    c = input.getchar()
+
+                # c = input.getchar()
+                # if c in input.EXCLAMATION:
+                #     match += c
+                #     i += 1
+                    
+                #     c = input.getchar()
+                #     if c in input.DASH:
+                #         match += c
+                #         i += 1                
+
+                #         c = input.getchar()
+                #         if c in input.DASH:
+                #             match += c
+                #             i += 1      
+
+                #             c = input.getchar()
+                #             while c not in input.GREATER_THAN:
+                #                 match += c                                
+                #                 i += 1                
+                #                 c = input.getchar()
+                #         print(f'HTML comment : {match}')
 
             # identifier token
             elif c.isalpha(): #in string.ascii_letters:
@@ -127,9 +133,9 @@ class CLexer:
 
 if __name__ == '__main__':
     
-    clexer = CLexer()
-    input = CInput()
-    input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
-    input.ii_newfile('./src/test_files/web.config')
+    input = CInput('./src/test_files/web.config')
+    lexer = CLexer(input)
+    # input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
+    # input.ii_newfile('./src/test_files/web.config')
     i = 1
     c = input.getchar()

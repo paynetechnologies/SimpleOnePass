@@ -309,7 +309,7 @@ class CInput:
         t1=0
         #t2=0
 
-        ii_io(open_funct, close_funct, read_funct)
+        self.ii_io(open_funct, close_funct, read_funct)
 
         self.ii_io["openp"](filename, 'r')
 
