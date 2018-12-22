@@ -1,4 +1,5 @@
-
+'''Token Types'''
+# configuration -> configurations appsettings connectionstrings system.web system.webserver 
 
 class Token(object):
     
@@ -17,23 +18,20 @@ class Token(object):
     OPERATOR    = 'OP'
     PUNCTUATION = 'PUNC'
     WHITESPACE  = 'WS'
-    PLUS = 'PLUS_OP'
-    MINUS = 'MINUS_OP'
-    MULTIPLY = 'MULTIPLY_OP'
-    DIVIDE = 'DIVID_OP'
+    PLUS        = 'PLUS_OP'
+    MINUS       = 'MINUS_OP'
+    MULTIPLY    = 'MULTIPLY_OP'
+    DIVIDE      = 'DIVIDE_OP'
+    
+    CONFIGURATION   = 'CONFIGURATION'
+    CONFIGURATIONS  = 'CONFIGURATIONS'
+    SECTION         = 'SECTION'
+    TYPE            = 'TYPE'
+    APPSETTING      = 'APPSETTING'
     
     keywords    = ['if', 'else', 'elif', 'while']   
     token_value = 0
-
-    # DIV     = 256
-    # DONE    = 257
-    # ID      = 258
-    # MOD     = 259
-    # NEWLINE = 260
-    # NONE    = -1
-    # NUM     = 261
-    # OPERATOR = 262
-    # WHITESPACE = 999    
+  
 
     def __init__(self, type, value, line, line_no, line_pos):
         self.type = type

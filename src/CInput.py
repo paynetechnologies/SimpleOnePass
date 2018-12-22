@@ -41,40 +41,40 @@ import string
 import base64
 
 
-def open_funct(filename, mode, encoding=None):
-    fd=open(filename, mode, encoding=encoding)
-    return fd
+# def open_funct(filename, mode, encoding=None):
+#     fd=open(filename, mode, encoding=encoding)
+#     return fd
 
-def close_funct(fd):
-    fd.close()
+# def close_funct(fd):
+#     fd.close()
 
-def read_funct(fd, starting_at, need):
+# def read_funct(fd, starting_at, need):
 
-    begin_seek_pos = fd.tell()
+#     begin_seek_pos = fd.tell()
 
-    try:
-        fd.readinto(CInput.MVInputBuf[starting_at:])
-    except EOFError:
-        self.EOF_Read = True
-    except Exception as e :
-        print(f"Unexpected error : {e}", sys.exc_info()[0])
-        raise
+#     try:
+#         fd.readinto(CInput.MVInputBuf[starting_at:])
+#     except EOFError:
+#         CInput.EOF_Read = True
+#     except Exception as e :
+#         print(f"Unexpected error : {e}", sys.exc_info()[0])
+#         raise
     
-    got = min(fd.tell() - begin_seek_pos, need)
+#     got = min(fd.tell() - begin_seek_pos, need)
 
-    print(''.join([chr(c) for c in CInput.MVInputBuf]))
+#     print(''.join([chr(c) for c in CInput.MVInputBuf]))
 
-    return got
+#     return got
 
-def ii_io(open_funct, close_funct, read_funct):
-    '''
-    Used to change the low-level input functions that
-    are used to open files and fill the buffer.
-    '''
-    CInput.ii_io["openp"] = open_funct
-    CInput.ii_io["closep"] = close_funct            
-    CInput.ii_io["readp"] = read_funct
-    print(CInput.ii_io)
+# def ii_io(open_funct, close_funct, read_funct):
+#     '''
+#     Used to change the low-level input functions that
+#     are used to open files and fill the buffer.
+#     '''
+#     CInput.ii_io["openp"] = open_funct
+#     CInput.ii_io["closep"] = close_funct            
+#     CInput.ii_io["readp"] = read_funct
+#     print(CInput.ii_io)
 
 
 class CInput:
@@ -107,7 +107,6 @@ class CInput:
     End of file has been read. It's possible for this to be true 
     and for characters to still be in the input buffer.
     '''
-
     eof_marker = '$'
     whitespace = ' \t\n\r'
     newline = '\n'
@@ -133,9 +132,40 @@ class CInput:
             return True
         return False
 
+    def open_funct(self, filename, mode, encoding=None):
+        fd=open(filename, mode, encoding=encoding)
+        return fd
 
+    def close_funct(self, fd):
+        fd.close()
 
+    def read_funct(self, fd, starting_at, need):
 
+        begin_seek_pos = fd.tell()
+
+        try:
+            fd.readinto(CInput.MVInputBuf[starting_at:])
+        except EOFError:
+            CInput.EOF_Read = True
+        except Exception as e :
+            print(f"Unexpected error : {e}", sys.exc_info()[0])
+            raise
+        
+        got = min(fd.tell() - begin_seek_pos, need)
+
+        print(''.join([chr(c) for c in CInput.MVInputBuf]))
+
+        return got
+
+    def ii_ii(self, o, c, r):
+        '''
+        Used to change the low-level input functions that
+        are used to open files and fill the buffer.
+        '''
+        CInput.ii_io["openp"] = o
+        CInput.ii_io["closep"] = c
+        CInput.ii_io["readp"] = r
+        #print(CInput.ii_io)
 
     #---------------------------------------------------
     #                      Access
@@ -406,16 +436,16 @@ class CInput:
         flushes the buffer willy-nilly if you read past the end of buffer.
         Similarly, input_line() flushes the buffer at the beginning of each line.
                                         
-    Start_buf    pmark              DANGER              END
-    |            |smark        emark  |Next       L_BufEnd|
-    |            | |            |     | |            |   |
-    v            v v            v     v v            v   v 
-    +-------------------------------------------+---+---+
-    | this is already read | to be read Next    | waste |
-    |-------------------------------------------|-------|
-    |<------ shift_amt --->|<----copy_amt------>|       |
-    |                                                   |
-    |<------------------- BUFSIZE --------------------->|
+        Start_buf    pmark              DANGER              END
+        |            |smark        emark  |Next       L_BufEnd|
+        |            | |            |     | |            |   |
+        v            v v            v     v v            v   v 
+        +-------------------------------------------+---+---+
+        | this is already read | to be read Next    | waste |
+        |-------------------------------------------|-------|
+        |<------ shift_amt --->|<----copy_amt------>|       |
+        |                                                   |
+        |<------------------- BUFSIZE --------------------->|
 
         Either the pMark of sMark, whichever is smaller, is used as the leftmost
         edge of the buffer. None of the text to the right of the mark will be 
@@ -574,7 +604,8 @@ class CInput:
         if (self.EOF_Read and p >= self.L_BufEnd):
             return self.EOF
 
-        return 0 if (p < self.MVInputBuf or p >= self.L_BufEnd) else self.MVInputBuf[p]
+        #return 0 if (p < self.MVInputBuf or p >= self.L_BufEnd) else self.MVInputBuf[p]
+        return 0 if (p < 0 or p >= self.L_BufEnd) else self.MVInputBuf[p]
 
     #------------------------------------------------
     #Pushback(n) is passed the number of characters to push back. 
@@ -671,7 +702,7 @@ class CInput:
         correctly for strings that have been terminated with ii_term() calls, ii_look() 
         does not. 
         '''
-        return self.Termchar if (n == 1 and self.Termchar is not None) else ii_look(n)
+        return self.Termchar if (n == 1 and self.Termchar is not None) else self.ii_look(n)
 
     def ii_flushbuf(self):
         '''
@@ -728,7 +759,6 @@ class CInput:
     def printBuf(self):
         print(''.join([chr(c) for c in self.MVInputBuf]))
 
-
     def getchar(self):
         c = self.ii_advance(0)
         if c == -1:
@@ -740,26 +770,9 @@ class CInput:
 if __name__ == '__main__':
     
     input = CInput()
-    ii_io(open_funct, close_funct, read_funct)
+    input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
     input.ii_newfile('./src/test_files/web.config') 
     #input.ii_newfile('./src/test_files/abcdefg.txt') 
-    
-    # i = 1
-    # c = ii_advance()
-    # print(f'First char : {chr(c)}')
-    
-    # while not NO_MORE_CHARS(self):
-    #     i+=1
-    #     c = ii_advance()
-    #     if c != -1:
-    #         pass
-    #         #print(f'c : {i} - {chr(c)}')
-    #         #print(chr(c))
-    #     elif c == -1:
-    #         #print(f'Next Char : {i}')
-    #         ii_mark_prev()
-    #         ii_mark_start()          
-    # printBuf()
 
     i = 1
     c = input.getchar()
@@ -791,6 +804,15 @@ if __name__ == '__main__':
         elif c in input.LESS_THAN:
             match = c
             i += 1                
+
+            if (chr(input.ii_look(1)) == input.EXCLAMATION):
+                print(f'ii_look found EXCLAMATION')
+            else:
+                print(f'{i} - {c}')            
+                i += 1
+                c = input.getchar()
+                continue
+
 
             c = input.getchar()
             if c in input.EXCLAMATION:
@@ -849,3 +871,20 @@ if __name__ == '__main__':
             i += 1
             c = input.getchar()
 
+    
+    # i = 1
+    # c = ii_advance()
+    # print(f'First char : {chr(c)}')
+    
+    # while not NO_MORE_CHARS(self):
+    #     i+=1
+    #     c = ii_advance()
+    #     if c != -1:
+    #         pass
+    #         #print(f'c : {i} - {chr(c)}')
+    #         #print(chr(c))
+    #     elif c == -1:
+    #         #print(f'Next Char : {i}')
+    #         ii_mark_prev()
+    #         ii_mark_start()          
+    # printBuf()
