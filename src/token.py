@@ -22,6 +22,10 @@ class Token(object):
     MINUS       = 'MINUS_OP'
     MULTIPLY    = 'MULTIPLY_OP'
     DIVIDE      = 'DIVIDE_OP'
+    LESS_THAN   = 'LESS_THAN'
+    GREATER_THAN    = 'GREATER_THAN'
+    DASH            = 'DASH'
+    EXCLAMATION     = 'EXCLAMATION'
     
     CONFIGURATION   = 'CONFIGURATION'
     CONFIGURATIONS  = 'CONFIGSECTIONS'
@@ -29,9 +33,10 @@ class Token(object):
     TYPE            = 'TYPE'
     APPSETTING      = 'APPSETTING'
     CONNECTIONSTRINGS = 'CONNECTIONSTRINGS'
-    SYSTEM_WEB = 'SYSTEM_WEB'
-    SYSTEM_WEBSERVER = 'SYSTEM_WEBSERVER'
+    SYSTEM_WEB          = 'SYSTEM_WEB'
+    SYSTEM_WEBSERVER    = 'SYSTEM_WEBSERVER'
     SYSTEM_SERVICEMODEL = 'SYSTEM_SERVICEMODEL'
+    HTML_COMMENT = 'HTML_COMMENT'
     
     keywords    = ['if', 'else', 'elif', 'while']
 
@@ -41,12 +46,13 @@ class Token(object):
     token_value = 0
   
 
-    def __init__(self, type, value, line, line_no, line_pos):
+    #def __init__(self, type, value, line, line_no, line_pos):
+    def __init__(self, type, value, line_no, line_pos):        
         self.type = type
         self.value = value
-        self.line = line
-        self.line_pos = line_pos - len(value)
+        #self.line = line
         self.line_no = line_no
-
+        self.line_pos = line_pos - len(value)
+        
     def __str__(self):
         return '{0}:{1}'.format(self.line_no + 1, self.line_pos).ljust(10) + self.type.ljust(15) + self.value

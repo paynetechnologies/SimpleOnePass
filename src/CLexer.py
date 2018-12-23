@@ -62,30 +62,10 @@ class CLexer:
                             print(f'HTML comment : {match}')
                 else:
                     print(f'{i} - {c}')            
+                    token = Token(Token.LESS_THAN, c, input.Lineno, self.line_pos)
+                    self.tokens.append(token)                    
                     i += 1
                     c = input.getchar()
-
-                # c = input.getchar()
-                # if c in input.EXCLAMATION:
-                #     match += c
-                #     i += 1
-                    
-                #     c = input.getchar()
-                #     if c in input.DASH:
-                #         match += c
-                #         i += 1                
-
-                #         c = input.getchar()
-                #         if c in input.DASH:
-                #             match += c
-                #             i += 1      
-
-                #             c = input.getchar()
-                #             while c not in input.GREATER_THAN:
-                #                 match += c                                
-                #                 i += 1                
-                #                 c = input.getchar()
-                #         print(f'HTML comment : {match}')
 
             # identifier token
             elif c.isalpha(): #in string.ascii_letters:
@@ -99,7 +79,8 @@ class CLexer:
                     c = input.getchar()               
 
                 #print(f'id : {match}')
-                token = Token(Token.IDENT, match, input.Lineno, self.line_no, self.line_pos)
+                #token = Token(Token.IDENT, match, input.Lineno, self.line_no, self.line_pos)
+                token = Token(Token.IDENT, match, input.Lineno, self.line_pos)
                 self.tokens.append(token)
 
             # number
@@ -114,7 +95,8 @@ class CLexer:
                     i += 1 
                     Token.token_value = Token.token_value * 10 + int(c) - 0
                     c = input.getchar()
-                token = Token(Token.NUM, c, input.Lineno, self.line_no, self.line_pos)
+                #token = Token(Token.NUM, c, input.Lineno, self.line_no, self.line_pos)
+                token = Token(Token.NUM, c, input.Lineno, self.line_pos)
                 self.tokens.append(token)                   
                 #print(f'number : {match}')
                 # return Token.NUM                
@@ -125,7 +107,8 @@ class CLexer:
                 c = input.getchar()
 
         # end of file token
-        token = Token(Token.EOF, c, None, self.line_no, self.line_pos)
+        #token = Token(Token.EOF, c, None, self.line_no, self.line_pos)
+        token = Token(Token.EOF, c, self.line_no, self.line_pos)
         self.tokens.append(token)
 
         return self.tokens                

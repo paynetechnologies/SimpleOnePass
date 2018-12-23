@@ -24,7 +24,7 @@
 '''
 '''                                              
    Start_buf                            DANGER         END
-   |                           Next       |  L_BufEnd    |
+   |                           Next       |  L_BufEnd   |
    v                            |         |     |       |
    pmark    smark       emark   |         |     v       v
    v--------v-----------v-------v---------v-------------
@@ -46,10 +46,12 @@ class CInput:
     MAXLOOK = 16                                # max amount of lookahead
     MAXLEX  = 1024                              # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
-    InputBuf = array.array('B', [96 for x in range(BUFSIZE)]) # Input Buffer
+
+    # Input Buffer
+    InputBuf = array.array('B', [32 for x in range(BUFSIZE)]) 
     END = BUFSIZE                               # just past last char in buf
 
-    L_BufEnd = END  # logical buffer end...just past last char
+    Logical_Buffer_End = END  # logical buffer end...just past last char
     Next    = END   # Next input char
     sMark   = END   # start of current lexeme
     eMark   = END   # end of current lexeme
@@ -61,6 +63,7 @@ class CInput:
 
     inpFile     = STDIN  # input file handle
     Lineno      = 1     # current line number
+    Linepos     = 0 
     Mline       = 1     # Line # when mark_end() is called
     Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
 
@@ -76,7 +79,7 @@ class CInput:
     newline = '\n'
     comment_marker = '#'
     LESS_THAN = '<'
-    GREATER_THAN = '<'
+    GREATER_THAN = '>'
     DASH = '-'
     EXCLAMATION = '!'
 
@@ -93,10 +96,10 @@ class CInput:
     #---------------------------------------------------
     # Flush buffer when Next passes this address
     def DANGER(self):
-        return self.L_BufEnd - self.MAXLOOK
+        return self.Logical_Buffer_End - self.MAXLOOK
 
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next >= self.L_BufEnd):
+        if (self.EOF_Read and self.Next >= self.Logical_Buffer_End):
             return True
         return False
 
@@ -121,7 +124,7 @@ class CInput:
         
         got = min(fd.tell() - begin_seek_pos, need)
 
-        print(''.join([chr(c) for c in CInput.MVInputBuf]))
+        print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:]] ) )
 
         return got
 
@@ -276,8 +279,6 @@ class CInput:
         translation might cause problems if you're looking for an explicit '\n' in the input,
         though.
         '''
-
-
         if(fd != 0):   
             print(type(fd))
 
@@ -290,7 +291,7 @@ class CInput:
             self.Next      = self.END
             self.sMark     = self.END
             self.eMark     = self.END
-            self.L_BufEnd    = self.END
+            self.Logical_Buffer_End    = self.END
             self.Lineno    = 1
             self.Mline     = 1
 
@@ -309,7 +310,7 @@ class CInput:
         t1=0
         #t2=0
 
-        self.ii_io(open_funct, close_funct, read_funct)
+        self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
 
         self.ii_io["openp"](filename, 'r')
 
@@ -317,7 +318,7 @@ class CInput:
 
         with open(filename, 'r') as f:
             for chunk in iter(lambda: f.read(self.BUFSIZE), b''):
-                doStuff(chunk)
+                self.doStuff(chunk)
         end = time.time()
 
         t1 = end-start
@@ -395,7 +396,6 @@ class CInput:
         self.Next +=1
         return (c)
 
-
     def ii_flush(self, force):
         '''
         Flush the input buffer. Do nothing if the current input characters isn't
@@ -405,7 +405,7 @@ class CInput:
         Similarly, input_line() flushes the buffer at the beginning of each line.
                                         
         Start_buf    pmark              DANGER              END
-        |            |smark        emark  |Next       L_BufEnd|
+        |            |smark        emark  |Next      L_BufEnd|
         |            | |            |     | |            |   |
         v            v v            v     v v            v   v 
         +-------------------------------------------+---+---+
@@ -462,7 +462,7 @@ class CInput:
 
             # How many characters have to be copied (copy_ amt) 
             # and the distance that they have to be moved (shift_amt).
-            copy_amt = self.L_BufEnd - left_edge
+            copy_amt = self.Logical_Buffer_End - left_edge
 
             self.copy(self.MVInputBuf, left_edge, copy_amt)
 
@@ -478,7 +478,6 @@ class CInput:
             self.Next -= shift_amt
 
         return 1
-
     #--------------------------------------------
     # Pass a base address, and load as many MAXLEX-sized chunks into the buffur as will fit. 
     # The need variable is the amount needed. The logical-end-of-buffer marker is adjusted 
@@ -529,7 +528,7 @@ class CInput:
             print(f"Can't read input file. \n")
             return -1
 
-        self.L_BufEnd = starting_at + got
+        self.Logical_Buffer_End = starting_at + got
 
         if (got < need):
             self.EOF_Read = True
@@ -569,11 +568,11 @@ class CInput:
         p = None
         p = self.Next + (n - 1)
 
-        if (self.EOF_Read and p >= self.L_BufEnd):
+        if (self.EOF_Read and p >= self.Logical_Buffer_End):
             return self.EOF
 
-        #return 0 if (p < self.MVInputBuf or p >= self.L_BufEnd) else self.MVInputBuf[p]
-        return 0 if (p < 0 or p >= self.L_BufEnd) else self.MVInputBuf[p]
+        #return 0 if (p < self.MVInputBuf or p >= self.Logical_Buffer_End) else self.MVInputBuf[p]
+        return 0 if (p < 0 or p >= self.Logical_Buffer_End) else self.MVInputBuf[p]
 
     #------------------------------------------------
     #Pushback(n) is passed the number of characters to push back. 
@@ -729,17 +728,19 @@ class CInput:
 
     def getchar(self):
         c = self.ii_advance(0)
+        self.Linepos += 1
         if c == -1:
             c = self.ii_advance(1)
+            self.Linepos += 1
             self.ii_mark_prev()
             self.ii_mark_start() 
         return (chr(c))    
 
 if __name__ == '__main__':
     
-    input = CInput()
-    input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
-    input.ii_newfile('./src/test_files/web.config') 
+    input = CInput('./src/test_files/web.config2')
+    # input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
+    # input.ii_newfile('./src/test_files/web.config') 
     #input.ii_newfile('./src/test_files/abcdefg.txt') 
 
     i = 1
@@ -838,21 +839,3 @@ if __name__ == '__main__':
             print(f'{i} - {c}')            
             i += 1
             c = input.getchar()
-
-    
-    # i = 1
-    # c = ii_advance()
-    # print(f'First char : {chr(c)}')
-    
-    # while not NO_MORE_CHARS(self):
-    #     i+=1
-    #     c = ii_advance()
-    #     if c != -1:
-    #         pass
-    #         #print(f'c : {i} - {chr(c)}')
-    #         #print(chr(c))
-    #     elif c == -1:
-    #         #print(f'Next Char : {i}')
-    #         ii_mark_prev()
-    #         ii_mark_start()          
-    # printBuf()
