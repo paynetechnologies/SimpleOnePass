@@ -43,12 +43,12 @@ import base64
 
 class CInput:
 
-    MAXLOOK = 16                                # max amount of lookahead
-    MAXLEX  = 1024                              # max lexeme size
-    BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)      # Change the 3 only
+    MAXLOOK = 16                               # max amount of lookahead
+    MAXLEX  = 1024                             # max lexeme size
+    BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)     # Change the 3 only
 
     # Input Buffer
-    InputBuf = array.array('B', [32 for x in range(BUFSIZE)]) 
+    InputBuf = array.array('B', [46 for x in range(BUFSIZE)]) 
     END = BUFSIZE                               # just past last char in buf
 
     Logical_Buffer_End = END  # logical buffer end...just past last char
@@ -67,22 +67,13 @@ class CInput:
     Mline       = 1     # Line # when mark_end() is called
     Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
 
-    been_called = True
+    been_called = False
     EOF         = True  # constant
     EOF_Read    = False 
     ''' 
     End of file has been read. It's possible for this to be true 
     and for characters to still be in the input buffer.
     '''
-    eof_marker = '$'
-    whitespace = ' \t\n\r'
-    newline = '\n'
-    comment_marker = '#'
-    LESS_THAN = '<'
-    GREATER_THAN = '>'
-    DASH = '-'
-    EXCLAMATION = '!'
-
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
     MVInputBuf = memoryview(InputBuf)           # Memoryview of Input Buffer    
@@ -99,7 +90,7 @@ class CInput:
         return self.Logical_Buffer_End - self.MAXLOOK
 
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next >= self.Logical_Buffer_End):
+        if (self.EOF_Read and self.Next > self.Logical_Buffer_End):
             return True
         return False
 
@@ -388,8 +379,8 @@ class CInput:
         if (not self.EOF_Read and (self.ii_flush(needFlush) < 0)):
             return -1
 
-        if (self.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
-            self.Lineno += 1
+        # if (self.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
+        #     self.Lineno += 1
 
         c = self.MVInputBuf[self.Next]
 
@@ -708,134 +699,5 @@ class CInput:
         for i in range(size):
             print ("% d"% arr[i], end =" ") 
     
-    def skip_whitespace(self,c):
-        ''' [ \t\n]* '''
-        while c is not None and c.isspace():
-            c = self.ii_advance(0)
-            c = chr(c)
-
-    def integer(self,c):
-        """Return a (multidigit) integer consumed from the self."""
-        result = ''
-        while c is not None and c.isdigit():
-            result += c
-
-            c = self.ii_advance(0)
-        return int(result)
-
     def printBuf(self):
         print(''.join([chr(c) for c in self.MVInputBuf]))
-
-    def getchar(self):
-        c = self.ii_advance(0)
-        self.Linepos += 1
-        if c == -1:
-            c = self.ii_advance(1)
-            self.Linepos += 1
-            self.ii_mark_prev()
-            self.ii_mark_start() 
-        return (chr(c))    
-
-if __name__ == '__main__':
-    
-    input = CInput('./src/test_files/web.config2')
-    # input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
-    # input.ii_newfile('./src/test_files/web.config') 
-    #input.ii_newfile('./src/test_files/abcdefg.txt') 
-
-    i = 1
-    c = input.getchar()
-
-    while not input.NO_MORE_CHARS():
-        # ignore whitespace
-        if c in input.whitespace:
-            while c in input.whitespace:
-                if c in input.newline:
-                    input.Lineno += 1
-                    input.Linepos = 0
-                    print(f'newline')
-                i += 1
-                c = input.getchar()
-            print(f'whitespace')
-
-        # comment
-        elif c in input.comment_marker:
-            match = c
-            i += 1                
-            c = input.getchar()
-            while c not in input.newline:
-                match += c                                
-                i += 1                
-                c = input.getchar()
-            print(f'comment : {match}')
-
-        # html comment <!-- -->
-        elif c in input.LESS_THAN:
-            match = c
-            i += 1                
-
-            if (chr(input.ii_look(1)) == input.EXCLAMATION):
-                print(f'ii_look found EXCLAMATION')
-            else:
-                print(f'{i} - {c}')            
-                i += 1
-                c = input.getchar()
-                continue
-
-
-            c = input.getchar()
-            if c in input.EXCLAMATION:
-                match += c
-                i += 1
-                
-                c = input.getchar()
-                if c in input.DASH:
-                    match += c
-                    i += 1                
-
-                    c = input.getchar()
-                    if c in input.DASH:
-                        match += c
-                        i += 1      
-
-                        c = input.getchar()
-                        while c not in input.GREATER_THAN:
-                            match += c                                
-                            i += 1                
-                            c = input.getchar()
-                    print(f'HTML comment : {match}')
-
-        # identifier token
-        elif c.isalpha(): #in string.ascii_letters:
-            match = c
-            i += 1            
-            c = input.getchar()
-
-            while c.isalnum(): #in string.ascii_letters:
-                match += c
-                i += 1
-                c = input.getchar()               
-
-            print(f'id : {match}')
-            
-        # number
-        elif (c in string.digits):
-            match = c
-            i += 1            
-            #Token.token_value = int(char) - 0
-            c = input.getchar()
-            
-            while(c in string.digits):                    
-                match += c
-                i += 1 
-                #Token.token_value = Token.token_value * 10 + int(char) - 0
-                c = input.getchar()
-            # token = Token(Token.NUM, char, self.lines[self.line_no], self.line_no, self.line_pos)
-            # self.tokens.append(token)                   
-            # return Token.NUM
-            print(f'number : {match}')
-
-        else:
-            print(f'{i} - {c}')            
-            i += 1
-            c = input.getchar()

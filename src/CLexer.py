@@ -4,121 +4,149 @@ import sys
 from src.CInput import CInput
 from src.token import Token
 
-
 class CLexer:
+
+    EOF_MARKER = '$'
+    WHITESPACE = ' \t\n\r'
+    NEWLINE = '\n'
+    COMMENT_MARKER = '#'
+    LESS_THAN = '<'
+    GREATER_THAN = '>'
+    DASH = '-'
+    EXCLAMATION = '!'
+
 
     def __init__(self, input):
         
-        self.input_ptr = -1
         self.line_no = 0
         self.line_pos = 0
         self.token_value = None    
         self.tokens = [] 
         self.input = input
 
-    def tokenizer(self, input):
-        
-        i = 1
-        c = input.getchar()
 
+    def getchar(self):
+
+        c = input.ii_advance(0)
+        self.line_pos += 1
+
+        if c == -1:
+            c = input.ii_advance(1)
+            self.line_pos += 1
+            input.ii_mark_prev()
+            input.ii_mark_start() 
+        
+        return (chr(c))
+
+
+    def tokenizer(self, input):
+
+        c = self.getchar()
         while not input.NO_MORE_CHARS():
 
             # ignore whitespace
-            if c in input.whitespace:
-                while c in input.whitespace:
-                    if c in input.newline:
-                        input.Lineno += 1
-                        input.Linepos = 0
-                        #print(f'newline')
-                    i += 1
-                    c = input.getchar()
-                #print(f'whitespace')
+            if c in CLexer.WHITESPACE:
+                if c in CLexer.NEWLINE:
+                    self.line_no += 1
+                    self.line_pos = 0
+                c = self.getchar()
 
             # comment
-            elif c in input.comment_marker:
+            elif c in CLexer.COMMENT_MARKER:
                 match = c
-                i += 1                
-                c = input.getchar()
-                while c not in input.newline:
+                c = self.getchar()
+                while c not in CLexer.NEWLINE:
                     match += c                                
-                    i += 1                
-                    c = input.getchar()
-                print(f'comment : {match}')
+                    c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start() 
 
             # html comment <!-- -->
-            elif c in input.LESS_THAN:
+            elif c in CLexer.LESS_THAN:
                 match = c
-                i += 1                
 
-                if (chr(input.ii_look(1)) == input.EXCLAMATION):
-                    if (chr(input.ii_look(2)) == input.DASH):
-                        if (chr(input.ii_look(3)) == input.DASH):
-                            print(f'HTML Comment')
-                            c = input.getchar()
-                            while c not in input.GREATER_THAN:
+                if (chr(input.ii_look(1)) == CLexer.EXCLAMATION):
+                    if (chr(input.ii_look(2)) == CLexer.DASH):
+                        if (chr(input.ii_look(3)) == CLexer.DASH):
+                            c = self.getchar()
+                            while c not in CLexer.GREATER_THAN:
                                 match += c                                
-                                i += 1                
-                                c = input.getchar()
-                            print(f'HTML comment : {match}')
+                                c = self.getchar()
+                            #c in CLexer.GREATER_THAN:
+                            match += c
+                            token = Token(Token.HTML_COMMENT, match, self.line_no, self.line_pos)
+                            self.tokens.append(token) 
+                            c = self.getchar()
+
                 else:
-                    print(f'{i} - {c}')            
-                    token = Token(Token.LESS_THAN, c, input.Lineno, self.line_pos)
+                    token = Token(Token.LESS_THAN, c, self.line_no, self.line_pos)
                     self.tokens.append(token)                    
-                    i += 1
-                    c = input.getchar()
+                    c = self.getchar()
+
+                input.ii_mark_prev()
+                input.ii_mark_start()                     
 
             # identifier token
             elif c.isalpha(): #in string.ascii_letters:
                 match = c
-                i += 1    
-                c = input.getchar()
+                c = self.getchar()
 
                 while c.isalnum(): #in string.ascii_letters:
                     match += c
-                    i += 1
-                    c = input.getchar()               
-
-                #print(f'id : {match}')
-                #token = Token(Token.IDENT, match, input.Lineno, self.line_no, self.line_pos)
-                token = Token(Token.IDENT, match, input.Lineno, self.line_pos)
+                    c = self.getchar()               
+                
+                token = Token(Token.IDENT, match, self.line_no, self.line_pos)
                 self.tokens.append(token)
+
+                input.ii_mark_prev()
+                input.ii_mark_start()                 
 
             # number
             elif (c in string.digits):
                 match = c
-                i += 1            
                 Token.token_value = int(c) - 0
-                c = input.getchar()
-                
+                c = self.getchar()
+
                 while(c in string.digits):                    
                     match += c
-                    i += 1 
                     Token.token_value = Token.token_value * 10 + int(c) - 0
-                    c = input.getchar()
-                #token = Token(Token.NUM, c, input.Lineno, self.line_no, self.line_pos)
-                token = Token(Token.NUM, c, input.Lineno, self.line_pos)
+                    c = self.getchar()
+
+                token = Token(Token.NUM, match, self.line_no, self.line_pos)
                 self.tokens.append(token)                   
-                #print(f'number : {match}')
-                # return Token.NUM                
+                # return Token.NUM    
+        
+                input.ii_mark_prev()
+                input.ii_mark_start()                 
+
+            elif c in CLexer.GREATER_THAN:
+                token = Token(Token.GREATER_THAN, c, self.line_no, self.line_pos)
+                self.tokens.append(token)                    
+                c = self.getchar()
+                
+                input.ii_mark_prev()
+                input.ii_mark_start()                 
 
             else:
-                print(f'{i} - {c}')            
-                i += 1
-                c = input.getchar()
+                print(f'UNKNOWN - {c}')            
+                c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start() 
 
         # end of file token
-        #token = Token(Token.EOF, c, None, self.line_no, self.line_pos)
-        token = Token(Token.EOF, c, self.line_no, self.line_pos)
+
+
+        token = Token(Token.EOF, '$', self.line_no, self.line_pos)
         self.tokens.append(token)
 
         return self.tokens                
 
 
 if __name__ == '__main__':
-    
-    input = CInput('./src/test_files/web.config')
+    input = CInput('./src/test_files/web.config2')
     lexer = CLexer(input)
-    # input.ii_ii(input.open_funct, input.close_funct, input.read_funct)
-    # input.ii_newfile('./src/test_files/web.config')
-    i = 1
-    c = input.getchar()
+    token = lexer.tokenizer(input)
+
+    # on EOF, print the tokens    
+    for token in lexer.tokens:
+        print(token)
