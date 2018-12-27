@@ -9,36 +9,43 @@ class Token(object):
     END_BLOCK   = 'END'    
     EOF         = 'EOF'
     ID          = 'ID'
-    IDENT       = 'IDENT'
-    KEYWORD     = 'KEYWORD'
+    IDENT       = 'ID'
+    KEYWORD     = 'KW'
     MOD         = 'MOD'
     NEWLINE     = 'NL'
     NONE        = 'NONE'
     NUM         = 'NUM'
     OPERATOR    = 'OP'
-    PUNCTUATION = 'PUNC'
+    PUNCTUATION = 'PCT'
     WHITESPACE  = 'WS'
     PLUS        = 'PLUS_OP'
     MINUS       = 'MINUS_OP'
-    MULTIPLY    = 'MULTIPLY_OP'
-    DIVIDE      = 'DIVIDE_OP'
-    LESS_THAN   = 'LESS_THAN'
-    GREATER_THAN    = 'GREATER_THAN'
+    MULTIPLY    = 'MULT_OP'
+    DIVIDE      = 'DIV_OP'
+    QUOTE       = 'QT'
+
+    LESS_THAN       = 'LT'
+    GREATER_THAN    = 'GT'
     DASH            = 'DASH'
     EXCLAMATION     = 'EXCLAMATION'
     
-    CONFIGURATION   = 'CONFIGURATION'
-    CONFIGURATIONS  = 'CONFIGSECTIONS'
-    SECTION         = 'SECTION'
-    TYPE            = 'TYPE'
-    APPSETTING      = 'APPSETTING'
-    CONNECTIONSTRINGS = 'CONNECTIONSTRINGS'
+    APPSETTING          = 'APPSETTING'    
+    CONFIGURATION       = 'CONFIGURATION'
+    CONFIGURATIONS      = 'CONFIGSECTIONS'
+    CONNECTIONSTRINGS   = 'CONNECTIONSTRINGS'
+    HTML_COMMENT        = 'COMMENT'
+    Name                = 'NAME'
+    SECTION             = 'SECTION'
     SYSTEM_WEB          = 'SYSTEM_WEB'
     SYSTEM_WEBSERVER    = 'SYSTEM_WEBSERVER'
     SYSTEM_SERVICEMODEL = 'SYSTEM_SERVICEMODEL'
-    HTML_COMMENT = 'HTML_COMMENT'
-    
+    TYPE                = 'TYPE'
+
     keywords    = ['if', 'else', 'elif', 'while']
+
+    quoted_identifiers = ['name', 'type', 'key', 'value']
+    QUOTEDIDENTKEYWORD = "QIDKEYWORD"
+    QUOTEDIDENT = "QID"
 
     config_keywords   = ['configuration', 'configSections', 'appSettings',
     'connectionStrings', 'system.web', 'system.webServer', 'system.serviceModel']

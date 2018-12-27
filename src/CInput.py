@@ -1,4 +1,4 @@
-'''                                              L_BufEnd       
+'''                                              LBufEnd       
    Start_buf                                DANGER  |  END
    | Next                                      |    |   |
    |/                                          |    |   |
@@ -9,11 +9,11 @@
    |                                           |   |   |
    |                                MAXLOOK--->|   |<--|
    |<------------------ 3 x MAXLEX --------------->|   |
-   |<-------------------- BUFSIZE -------------------->|
+   |<---- BUFSIZE=(3 x MAXLEX ) + (2 * MAXLOOK)------->|
 '''
 '''                                              
    Start_buf                       Next      DANGER    END
-   |     pmark    smark        emark |         |L_BufEnd|
+   |     pmark    smark        emark |         |LBufEnd |
    |     |        |            |     |         |    |   |
    v     v        v            v     v         v    v   v 
    +-------------------------------------------+---+---+
@@ -23,10 +23,10 @@
    |<------------------- BUFSIZE --------------------->|
 '''
 '''                                              
-   Start_buf                            DANGER         END
-   |                           Next       |  L_BufEnd   |
-   v                            |         |     |       |
-   pmark    smark       emark   |         |     v       v
+   Start_buf                            DANGER        END
+   |                           Next       |  LBufEnd   |
+   v                            |         |     |      |
+   pmark    smark       emark   |         |     v      v
    v--------v-----------v-------v---------v-------------
    |prev lex|current lex|      |YYY|           |XXXXXXX| After Flush
    |-------------------------------------------|-------|
@@ -46,12 +46,12 @@ class CInput:
     MAXLOOK = 16                               # max amount of lookahead
     MAXLEX  = 1024                             # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)     # Change the 3 only
+    END = BUFSIZE                               # just past last char in buf
 
     # Input Buffer
     InputBuf = array.array('B', [46 for x in range(BUFSIZE)]) 
-    END = BUFSIZE                               # just past last char in buf
 
-    Logical_Buffer_End = END  # logical buffer end...just past last char
+    LBufEnd = END  # logical buffer end...just past last char
     Next    = END   # Next input char
     sMark   = END   # start of current lexeme
     eMark   = END   # end of current lexeme
@@ -69,31 +69,27 @@ class CInput:
 
     been_called = False
     EOF         = True  # constant
-    EOF_Read    = False 
     ''' 
     End of file has been read. It's possible for this to be true 
     and for characters to still be in the input buffer.
     '''
+    EOF_Read    = False 
+    
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
     MVInputBuf = memoryview(InputBuf)           # Memoryview of Input Buffer    
 
+
+
     def __init__(self, fileName ):
         self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
         self.ii_newfile(fileName)         
-        
+
+
+
     #---------------------------------------------------
     #                      I/O
     #---------------------------------------------------
-    # Flush buffer when Next passes this address
-    def DANGER(self):
-        return self.Logical_Buffer_End - self.MAXLOOK
-
-    def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next > self.Logical_Buffer_End):
-            return True
-        return False
-
     def open_funct(self, filename, mode, encoding=None):
         fd=open(filename, mode, encoding=encoding)
         return fd
@@ -128,6 +124,122 @@ class CInput:
         CInput.ii_io["closep"] = c
         CInput.ii_io["readp"] = r
         #print(CInput.ii_io)
+
+    #---------------------------------------------------
+    #                      Open Read File
+    # The normal mechanism for opening a new input file. 
+    # It is passed the file name and returns the file descriptor (not the
+    # FILE pointer) for the opened file, or -1 if the file couldn't be opened. 
+    # The previous input file is closed unless it was standard self. 
+    # ii _new fi1e() does not actually read the first buffer; rather, it 
+    # sets up the various pointers so that the buffer is loaded the first time a 
+    # character is requested. This way, programs that never call ii_newfile() will
+    # work successfully, getting input from standard self. The problem with this approach is
+    # that you must read at least one character before you can look ahead in the input (otherwise
+    # the buffer won't be initialized). If you need to look ahead before advancing, use:
+    #     ii_advance(); Read first bufferfull of input 
+    #     ii_pushback(l); but put back the first character 
+    # The default input stream [used if ii newfile() is never called] is standard self.
+    # You can reassign the input to standard input (say, after you get input from a file) 
+    # by calling: ii_newfile(NULL)
+    #
+    # Note that the input buffer is not read by ii newfile ( ) ; rather, the various pointers
+    # are initialized to point at the end of the buffer. The actual input routine (advance (), 
+    # discussed below) treats this situation the same as it would the Next pointer crossing 
+    # the DANGER point. It shifts the buffer's tail all the way to the left (in this case 
+    # the tail is empty so no characters are shifted, but the pointers are moved), and then loads the buffer 
+    # from the disk.
+    #---------------------------------------------------
+    def ii_newfile(self, name=None):
+        '''
+        Prepare a new iput file for reading. If newfile() isn't called before
+        input() or input_line() then stdin is used. The current input file is
+        closed after successfully opening the new one (but stdin is not closed.)
+        
+        Return -1 if the file can't be opened, otherwise, return the file
+        descripotor returned from open(). Note: the old input file won't be 
+        closed unless the new file is opened successfully The error code (errno)
+        generated by the bad open() will still be valid, so you can call perror()
+        to find out what went wrong if you like. At least one free file
+        descriptor must be available when newfile() is called. Note in the open
+        call that 'rb' is used to open read in binary mode.
+        '''
+
+        fd = None # file descriptor
+
+        name = input if (name == '/dev/tty') else name
+
+        fd = self.STDIN if name is None else self.ii_io["openp"](name, 'rb')
+        
+        '''
+        Note that the indirect open () call uses the 'rb' BINARY input mode. A CR-LF
+        (carriage-return, linefeed) pair is not translated into a single '\n' when binary-mode
+        input is active. This behavior is desirable in most LEX applications, which treat both CR
+        and LF as white space. There's no point wasting time doing the translation. The lack of
+        translation might cause problems if you're looking for an explicit '\n' in the input,
+        though.
+        '''
+        if(fd != 0):   
+            print(type(fd))
+
+            if self.inpFile != self.STDIN:
+                self.ii_io["closep"](self.inpFile)
+
+            self.inpFile = fd
+            self.EOF_Read = False
+
+            self.Next      = self.END
+            self.sMark     = self.END
+            self.eMark     = self.END
+            self.LBufEnd    = self.END
+            self.Lineno    = 1
+            self.Mline     = 1
+
+        return fd
+
+    def doStuff(self, chunk):
+        lines = chunk.split(b'\n')
+        for line in lines:
+            print(line)
+
+
+        #readfile_into_buffer("./test_files/web.config") #python self.py
+        #readfile_into_buffer("./src/test_files/web.config") #DEBUG
+
+    def readfile_into_buffer(self, filename):
+        t1=0
+        #t2=0
+
+        self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
+
+        self.ii_io["openp"](filename, 'r')
+
+        start = time.time()
+
+        with open(filename, 'r') as f:
+            for chunk in iter(lambda: f.read(self.BUFSIZE), b''):
+                self.doStuff(chunk)
+        end = time.time()
+
+        t1 = end-start
+        print(f't1 - {t1}')
+        '''
+        start = time.time()
+        with open(filename, 'rb') as f:
+            while True:
+                chunk = f.read(self.BUFSIZE)
+                if not chunk:
+                    break
+                doStuff(chunk)
+        end = time.time()
+        t2 = end - start
+        '''
+        
+        #print(f't1 - {t1} : t2  {t2}')
+
+    def chunk_file(self, fd, chunksize = BUFSIZE):
+        return iter(lambda: fd.read(chunksize), b'')      
+
 
     #---------------------------------------------------
     #                      Access
@@ -214,152 +326,48 @@ class CInput:
         self.pLineno = self.Lineno
         self.pLength = self.eMark - self.sMark
         return self.pMark
-
-
-    #---------------------------------------------------
-    #                      Open Read File
-    # The normal mechanism for opening a new input file. 
-    # It is passed the file name and returns the file descriptor (not the
-    # FILE pointer) for the opened file, or -1 if the file couldn't be opened. 
-    # The previous input file is closed unless it was standard self. 
-    # ii _new fi1e() does not actually read the first buffer; rather, it 
-    # sets up the various pointers so that the buffer is loaded the first time a 
-    # character is requested. This way, programs that never call ii_newfile() will
-    # work successfully, getting input from standard self. The problem with this approach is
-    # that you must read at least one character before you can look ahead in the input (otherwise
-    # the buffer won't be initialized). If you need to look ahead before advancing, use:
-    #     ii_advance(); Read first bufferfull of input 
-    #     ii_pushback(l); but put back the first character 
-    # The default input stream [used if ii newfile() is never called] is standard self.
-    # You can reassign the input to standard input (say, after you get input from a file) 
-    # by calling: ii_newfile(NULL)
-    #
-    # Note that the input buffer is not read by ii newfile ( ) ; rather, the various pointers
-    # are initialized to point at the end of the buffer. The actual input routine (advance (), 
-    # discussed below) treats this situation the same as it would the Next pointer crossing 
-    # the DANGER point. It shifts the buffer's tail all the way to the left (in this case 
-    # the tail is empty so no characters are shifted, but the pointers are moved), and then loads the buffer 
-    # from the disk.
-    #---------------------------------------------------
-    def ii_newfile(self, name=None):
-        '''
-        Prepare a new iput file for reading. If newfile() isn't called before
-        input() or input_line() then stdin is used. The current input file is
-        closed after successfully opening the new one (but stdin is not closed.)
-        
-        Return -1 if the file can't be opened, otherwise, return the file
-        descripotor returned from open(). Note: the old input file won't be 
-        closed unless the new file is opened successfully The error code (errno)
-        generated by the bad open() will still be valid, so you can call perror()
-        to find out what went wrong if you like. At least one free file
-        descriptor must be available when newfile() is called. Note in the open
-        call that 'rb' is used to open read in binary mode.
-        '''
-
-        fd = None # file descriptor
-
-        name = input if (name == '/dev/tty') else name
-
-        fd = self.STDIN if name is None else self.ii_io["openp"](name, 'rb')
-        
-        '''
-        Note that the indirect open () call uses the 'rb' BINARY input mode. A CR-LF
-        (carriage-return, linefeed) pair is not translated into a single '\n' when binary-mode
-        input is active. This behavior is desirable in most LEX applications, which treat both CR
-        and LF as white space. There's no point wasting time doing the translation. The lack of
-        translation might cause problems if you're looking for an explicit '\n' in the input,
-        though.
-        '''
-        if(fd != 0):   
-            print(type(fd))
-
-            if self.inpFile != self.STDIN:
-                self.ii_io["closep"](self.inpFile)
-
-            self.inpFile = fd
-            self.EOF_Read = False
-
-            self.Next      = self.END
-            self.sMark     = self.END
-            self.eMark     = self.END
-            self.Logical_Buffer_End    = self.END
-            self.Lineno    = 1
-            self.Mline     = 1
-
-        return fd
-
-    def doStuff(self, chunk):
-        lines = chunk.split(b'\n')
-        for line in lines:
-            print(line)
-
-
-        #readfile_into_buffer("./test_files/web.config") #python self.py
-        #readfile_into_buffer("./src/test_files/web.config") #DEBUG
-
-    def readfile_into_buffer(self, filename):
-        t1=0
-        #t2=0
-
-        self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
-
-        self.ii_io["openp"](filename, 'r')
-
-        start = time.time()
-
-        with open(filename, 'r') as f:
-            for chunk in iter(lambda: f.read(self.BUFSIZE), b''):
-                self.doStuff(chunk)
-        end = time.time()
-
-        t1 = end-start
-        print(f't1 - {t1}')
-        '''
-        start = time.time()
-        with open(filename, 'rb') as f:
-            while True:
-                chunk = f.read(self.BUFSIZE)
-                if not chunk:
-                    break
-                doStuff(chunk)
-        end = time.time()
-        t2 = end - start
-        '''
-        
-        #print(f't1 - {t1} : t2  {t2}')
-
-    def chunk_file(self, fd, chunksize = BUFSIZE):
-        return iter(lambda: fd.read(chunksize), b'')      
-
+    
     def Need_Extra_newLine(self):     
 
-            '''
-            Push a newline on the empty buffer so LEX start-of-line
-            will work on the first input line.
-            Provided for those situations where you want an extra newline appended 
-            to the beginning of a file. LEX needs this capability for processing the 
-            start-of-line anchor-a mechanism for recognizing strings only if they appear 
-            at the far left of a line. Such strings must be preceded by a newline, so an 
-            extra newline has to be appended in front of the first line of the file; otherwise, 
-            the anchored expression wouldn't be recognized on the first line.4
-            '''
-            self.Next = self.sMark = self.eMark = self.END - 1
-            
-            # str
-            # does this add to next or end of buffer
-            # self.InputBuf[self.Next] + '*' #\n'
-            
-            # byte array 
-            # *Next = '\n'
-            # self.membuf[self.Next] = '\n'
-            self.MVInputBuf[self.Next] =  ord(b'\n')
+        '''
+        Push a newline on the empty buffer so LEX start-of-line
+        will work on the first input line.
+        Provided for those situations where you want an extra newline appended 
+        to the beginning of a file. LEX needs this capability for processing the 
+        start-of-line anchor-a mechanism for recognizing strings only if they appear 
+        at the far left of a line. Such strings must be preceded by a newline, so an 
+        extra newline has to be appended in front of the first line of the file; otherwise, 
+        the anchored expression wouldn't be recognized on the first line.4
+        '''
+        self.Next = self.sMark = self.eMark = self.END - 1
+        
+        # str
+        # does this add to next or end of buffer
+        # self.InputBuf[self.Next] + '*' #\n'
+        
+        # byte array 
+        # *Next = '\n'
+        # self.membuf[self.Next] = '\n'
+        self.MVInputBuf[self.Next] =  ord(b'\n')
 
-            self.Lineno -= 1
-            self.Mline -= 1
-            self.been_called = True
+        self.Lineno -= 1
+        self.Mline -= 1
+        self.been_called = True
 
     #---------------------------------------------------
-    #                      Advance Flush Fill 
+    #             Buffer 
+    #---------------------------------------------------
+
+    # Flush buffer when Next passes this address
+    def DANGER(self):
+        return self.LBufEnd - self.MAXLOOK
+
+    def NO_MORE_CHARS(self):
+        if (self.EOF_Read and self.Next > self.LBufEnd):
+            return True
+        return False
+    #---------------------------------------------------
+    #                      Advance & Flush
     #---------------------------------------------------
     def ii_advance(self, needFlush):
         '''
@@ -379,13 +387,14 @@ class CInput:
         if (not self.EOF_Read and (self.ii_flush(needFlush) < 0)):
             return -1
 
-        # if (self.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
-        #     self.Lineno += 1
+        if (self.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
+            self.Lineno += 1
 
         c = self.MVInputBuf[self.Next]
 
         self.Next +=1
         return (c)
+
 
     def ii_flush(self, force):
         '''
@@ -396,7 +405,7 @@ class CInput:
         Similarly, input_line() flushes the buffer at the beginning of each line.
                                         
         Start_buf    pmark              DANGER              END
-        |            |smark        emark  |Next      L_BufEnd|
+        |            |smark        emark  |Next      LBufEnd|
         |            | |            |     | |            |   |
         v            v v            v     v v            v   v 
         +-------------------------------------------+---+---+
@@ -453,7 +462,7 @@ class CInput:
 
             # How many characters have to be copied (copy_ amt) 
             # and the distance that they have to be moved (shift_amt).
-            copy_amt = self.Logical_Buffer_End - left_edge
+            copy_amt = self.LBufEnd - left_edge
 
             self.copy(self.MVInputBuf, left_edge, copy_amt)
 
@@ -519,7 +528,7 @@ class CInput:
             print(f"Can't read input file. \n")
             return -1
 
-        self.Logical_Buffer_End = starting_at + got
+        self.LBufEnd = starting_at + got
 
         if (got < need):
             self.EOF_Read = True
@@ -538,6 +547,8 @@ class CInput:
     def shiftContentsLeft(self, arr, n): 
         for i in range(n-1): 
             arr[i] = arr[i + 1] 
+
+
 
     #---------------------------------------------------
     #                      LookAhead PushBack
@@ -559,11 +570,12 @@ class CInput:
         p = None
         p = self.Next + (n - 1)
 
-        if (self.EOF_Read and p >= self.Logical_Buffer_End):
+        if (self.EOF_Read and p >= self.LBufEnd):
             return self.EOF
 
-        #return 0 if (p < self.MVInputBuf or p >= self.Logical_Buffer_End) else self.MVInputBuf[p]
-        return 0 if (p < 0 or p >= self.Logical_Buffer_End) else self.MVInputBuf[p]
+        #return 0 if (p < self.MVInputBuf or p >= self.LBufEnd) else self.MVInputBuf[p]
+        return 0 if (p < 0 or p >= self.LBufEnd) else self.MVInputBuf[p]
+
 
     #------------------------------------------------
     #Pushback(n) is passed the number of characters to push back. 
@@ -590,8 +602,7 @@ class CInput:
         if (self.Next < self.eMark):
             self.eMark =  self.Next
             self.Mline = self.Lineno
-
-
+            
         return( self.Next > self.sMark )    
 
     #---------------------------------------------------
@@ -670,18 +681,6 @@ class CInput:
         if (self.Termchar is not None):    
             self.ii_unterm()
         return self.ii_flush(1)
-
-
-
-    #################################################
-    # Python3 program to rotate an array by  
-    # d elements  
-    # Function to left rotate arr[] of size n by d*/ 
-        # Driver program to test above functions */ 
-        # arr = array.array('B', [x for x in range(10)])
-        # #arr = [1, 2, 3, 4, 5, 6, 7] 
-        # leftRotate(arr, 2, 7) 
-        # printArray(arr, 7) 
         
     def leftRotate(self,arr, d, n): 
         for i in range(d): 
