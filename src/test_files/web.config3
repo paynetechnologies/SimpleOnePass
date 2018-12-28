@@ -1,4 +1,4 @@
-﻿<configuration>
+<configuration>
 	<configSections>
 		<section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net"/>
 		<!-- 2 - SubSonic section handler-->

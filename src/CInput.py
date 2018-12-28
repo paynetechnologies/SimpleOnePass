@@ -180,7 +180,7 @@ class CInput:
         though.
         '''
         if(fd != 0):   
-            print(type(fd))
+            #print(type(fd))
 
             if self.inpFile != self.STDIN:
                 self.ii_io["closep"](self.inpFile)
@@ -541,7 +541,7 @@ class CInput:
     def copy(self, buf, left, amt):
         for i in range(amt):
             self.shiftContentsLeft(bytearray(buf), left)
-        self.printArray(buf,amt)
+        #self.printArray(buf,amt)
     
     # Function to left Rotate arr[] of size n by 1*/  
     def shiftContentsLeft(self, arr, n): 

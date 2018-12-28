@@ -30,16 +30,14 @@ class CLexer:
     def getchar(self):
 
         c = self.input.ii_advance(0)
-        self.line_pos += 1
 
         if c == -1:
             c = self.input.ii_advance(1)
-            self.line_pos += 1
             self.input.ii_mark_prev()
             self.input.ii_mark_start() 
         
+        self.line_pos += 1
         return (chr(c))
-
 
     def tokenizer(self, input):
 
@@ -48,11 +46,12 @@ class CLexer:
 
             # ignore whitespace
             if c in CLexer.WHITESPACE:
-                if c in CLexer.NEWLINE:
-                    self.line_no += 1
-                    self.line_pos = 0
+                while c in CLexer.WHITESPACE:
+                    if c in CLexer.NEWLINE:
+                        self.line_no += 1
+                        self.line_pos = 0
 
-                c = self.getchar()
+                    c = self.getchar()
 
             # comment
             elif c in CLexer.COMMENT_MARKER:
@@ -210,40 +209,10 @@ class CLexer:
         self.tokens.append(token) 
 
 if __name__ == '__main__':
-    cinput = CInput('./src/test_files/web.config2')
+    cinput = CInput('./src/test_files/web.config')
     lexer = CLexer(cinput)
     token = lexer.tokenizer(cinput)
 
     # on EOF, print the tokens    
     for token in lexer.tokens:
         print(token)
-
-'''
-        if match in token.quoted_identifiers:
-            token = Token(Token.QUOTEDIDENTKEYWORD, match, self.line_no, self.line_pos)
-            self.tokens.append(token)
-
-            #self.GetQuotedIdent(c)
-            if (c != "="):
-                print(f'Expected =')
-                continue;
-
-            token = Token(Token.PUNCTUATION, c, self.line_no, self.line_pos)
-            self.tokens.append(token)
-
-            c = self.getchar()            
-            match = c            
-            self.input.ii_mark_prev()
-            self.input.ii_mark_start()                 
-            
-            c = self.getchar()            
-            while c not in ['"']:     # get quoted literal 
-                match += c                                
-                c = self.getchar()
-            match += c                              # c is >
-            token = Token(Token.QUOTEDIDENT, match, self.line_no, self.line_pos)
-            self.tokens.append(token) 
-            c = self.getchar()
-            self.input.ii_mark_prev()
-            self.input.ii_mark_start()                
-'''
