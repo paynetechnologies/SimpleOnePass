@@ -16,6 +16,9 @@ class CLexer:
     EXCLAMATION = '!'
     QUOTE = '"'
     TIC = "'"
+    MAX_QT_LEN = 256
+    OPERATORS = '+-*/=<>!'
+    PUNCTUATORS = '.?:[](),;#"_@\/~%'
 
 
     def __init__(self, input):
@@ -32,9 +35,7 @@ class CLexer:
         c = self.input.ii_advance(0)
 
         if c == -1:
-            c = self.input.ii_advance(1)
-            self.input.ii_mark_prev()
-            self.input.ii_mark_start() 
+            raise ValueError('buffer overflow')
         
         self.line_pos += 1
         return (chr(c))
@@ -44,43 +45,48 @@ class CLexer:
         c = self.getchar()
         while not input.NO_MORE_CHARS():
 
-            # ignore whitespace
+            # whitespace
             if c in CLexer.WHITESPACE:
-                while c in CLexer.WHITESPACE:
-                    if c in CLexer.NEWLINE:
-                        self.line_no += 1
-                        self.line_pos = 0
+                #while c in CLexer.WHITESPACE and not input.NO_MORE_CHARS():
+                if c in CLexer.NEWLINE:
+                    self.line_no += 1
+                    self.line_pos = 0
 
-                    c = self.getchar()
+                c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start() 
 
             # comment
             elif c in CLexer.COMMENT_MARKER:
-
                 match = c
                 c = self.getchar()
-                while c not in CLexer.NEWLINE:
-                    match += c                                
+                while c not in CLexer.NEWLINE and not input.NO_MORE_CHARS():
+                    match += c        
+                    if c in CLexer.NEWLINE:
+                        self.line_no += 1
+                        self.line_pos = 0                                              
                     c = self.getchar()
 
                 input.ii_mark_prev()
                 input.ii_mark_start() 
 
             # html comment <!-- -->
-
             elif c in CLexer.LESS_THAN:
                 match = c
-
                 if (chr(input.ii_look(1)) == CLexer.EXCLAMATION):
                     if (chr(input.ii_look(2)) == CLexer.DASH):
                         if (chr(input.ii_look(3)) == CLexer.DASH):
                             c = self.getchar()
-                            while c not in CLexer.GREATER_THAN:     # get comment
-                                match += c                                
+                            while c not in CLexer.GREATER_THAN  and not input.NO_MORE_CHARS():     # get comment
+                                match += c                                                                
+                                if c in CLexer.NEWLINE:
+                                    self.line_no += 1
+                                    self.line_pos = 0                                
                                 c = self.getchar()
                             match += c                              # c is >
                             token = Token(Token.HTML_COMMENT, match, self.line_no, self.line_pos)
                             self.tokens.append(token) 
-
+                # Less Than < sign
                 else:
                     token = Token(Token.LESS_THAN, c, self.line_no, self.line_pos)
                     self.tokens.append(token)       
@@ -89,19 +95,21 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start()                     
 
-            # identifier token
+            # identifier
             elif c.isalpha(): #in string.ascii_letters:
-
                 match = c
                 c = self.getchar()
 
-                while c.isalnum(): #in string.ascii_letters:
+                while c.isalnum() and not input.NO_MORE_CHARS(): #in string.ascii_letters:
                     match += c
+                    if c in CLexer.NEWLINE:
+                        self.line_no += 1
+                        self.line_pos = 0                      
                     c = self.getchar()
 
                 token = Token(Token.IDENT, match, self.line_no, self.line_pos)
                 self.tokens.append(token)
-                # c = self.getchar()
+
                 input.ii_mark_prev()
                 input.ii_mark_start()                 
 
@@ -112,8 +120,11 @@ class CLexer:
                 Token.token_value = int(c) - 0
                 c = self.getchar()
 
-                while(c in string.digits):                    
+                while(c in string.digits) and not input.NO_MORE_CHARS():                    
                     match += c
+                    if c in CLexer.NEWLINE:
+                        self.line_no += 1
+                        self.line_pos = 0  
                     Token.token_value = Token.token_value * 10 + int(c) - 0
                     c = self.getchar()
 
@@ -124,6 +135,7 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start()                 
 
+            # Greater Than > sign
             elif c in CLexer.GREATER_THAN:
 
                 token = Token(Token.GREATER_THAN, c, self.line_no, self.line_pos)
@@ -133,8 +145,27 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start()          
 
+            # Quoted Identifier
+            elif c in CLexer.QUOTE:
+
+                #self.GetQuotedIdent(c)
+
+                match = c                                                       # begin "        
+                c = self.getchar()            
+                while c not in  CLexer.QUOTE and not self.input.NO_MORE_CHARS():                                           # quoted literal 
+                    match += c                                
+                    c = self.getchar()
+                match += c                                                      # end "
+
+                token = Token(Token.QUOTEDIDENT, match, self.line_no, self.line_pos)
+                self.tokens.append(token) 
+
+                c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start()                    
+
             # operators
-            elif c in '+-*/=<>!':
+            elif c in CLexer.OPERATORS:
 
                 token = Token(Token.OPERATOR, c,  self.line_no, self.line_pos)
                 self.tokens.append(token)
@@ -143,17 +174,8 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start()                 
 
-            # Quoted Identifier
-            elif c in '"':
-
-                self.GetQuotedIdent(c)
-                c = self.getchar()
-                
-                input.ii_mark_prev()
-                input.ii_mark_start()                    
-
             # punctuators
-            elif c in '.?:[](),;#"_@\/~%':
+            elif c in CLexer.PUNCTUATORS:
 
                 token = Token(Token.PUNCTUATION, c, self.line_no, self.line_pos)
                 self.tokens.append(token)
@@ -164,8 +186,10 @@ class CLexer:
 
             # start block
             elif c == '{':
+
                 token = Token(Token.BEGIN_BLOCK, c, self.line_no, self.line_pos)
                 self.tokens.append(token)
+
                 c = self.getchar()
                 input.ii_mark_prev()
                 input.ii_mark_start()                 
@@ -182,9 +206,6 @@ class CLexer:
 
             else:
                 raise ValueError('Unexpected character found: {0}:{1} -> {2}'.format(self.line_no + 1, self.line_pos + 1, c))
-                c = self.getchar()
-                input.ii_mark_prev()
-                input.ii_mark_start() 
 
         # end of file token
 
@@ -195,12 +216,10 @@ class CLexer:
         return self.tokens                
 
     def GetQuotedIdent(self, c):
-        #token = Token(Token.PUNCTUATION, c, self.line_no, self.line_pos) # =
-        #self.tokens.append(token)
 
         match = c                                                       # begin "        
         c = self.getchar()            
-        while c not in ['"']:                                           # quoted literal 
+        while c not in  CLexer.QUOTE and not self.input.NO_MORE_CHARS():                                           # quoted literal 
             match += c                                
             c = self.getchar()
         match += c                                                      # end "
@@ -209,7 +228,7 @@ class CLexer:
         self.tokens.append(token) 
 
 if __name__ == '__main__':
-    cinput = CInput('./src/test_files/web.config')
+    cinput = CInput('./src/test_files/web.config2')
     lexer = CLexer(cinput)
     token = lexer.tokenizer(cinput)
 

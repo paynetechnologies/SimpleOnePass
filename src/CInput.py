@@ -106,12 +106,16 @@ class CInput:
         except EOFError:
             CInput.EOF_Read = True
         except Exception as e :
-            print(f"Unexpected error : {e}", sys.exc_info()[0])
-            raise
+            #print(f"Unexpected error : {e}", sys.exc_info()[0])
+            raise ValueError(f"READ Unexpected error : {e}", sys.exc_info()[0])
         
         got = min(fd.tell() - begin_seek_pos, need)
 
-        print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:]] ) )
+        tell_less_seek = fd.tell() - begin_seek_pos
+
+        print(f'################# read_funct got {got} bytes = (fd.tell() - begin_seek {tell_less_seek}) vs need {need}')
+
+        print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:starting_at+ got]] ) )
 
         return got
 
@@ -320,7 +324,7 @@ class CInput:
         once you save it, you must move it every time you move sMark.
         This is not done automatically, since you may want to 
         remember the token before last rather than the last one.
-        If ii_pmark_prev is never called, pMark is ignored, no worries;
+        If ii_mark_prev is never called, pMark is ignored, no worries;
         '''
         self.pMark = self.sMark
         self.pLineno = self.Lineno
@@ -466,7 +470,6 @@ class CInput:
 
             self.copy(self.MVInputBuf, left_edge, copy_amt)
 
-            #if (not ii_fillBuf(self.InputBuf + copy_amt)): # if using pointers: self.InputBuf is 1
             if (not self.ii_fillBuf(copy_amt)): 
                 print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
             
@@ -511,7 +514,8 @@ class CInput:
 
         need = int((( self.END  - starting_at) / self.MAXLEX) * self.MAXLEX)
 
-        print(f'Reading {need} bytes')
+        print(f'################# Fill Buffer #################')
+        print(f'################# Buffer can receive {need} bytes')
 
         if (need < 0):
             print(f'INTERNAL ERROR ii_filBuf() : Bad rea-request starting addr. \n')
@@ -522,13 +526,14 @@ class CInput:
 
         # do the read
         got = self.ii_io["readp"](self.inpFile, starting_at, need)
+        print(f'################# call to read_funct returned {got} bytes ')
 
         if (got == None):
-            pass
             print(f"Can't read input file. \n")
             return -1
 
         self.LBufEnd = starting_at + got
+        print(f'################# self.LBufEnd is {self.LBufEnd} ')
 
         if (got < need):
             self.EOF_Read = True
@@ -629,7 +634,7 @@ class CInput:
 
     def ii_unterm(self):
         if( self.Termchar):
-            self.MVInputBuf[self.Next] = self.Termchar;
+            self.MVInputBuf[self.Next] = self.Termchar
             self.Termchar = 0
 
     def ii_input(self):
