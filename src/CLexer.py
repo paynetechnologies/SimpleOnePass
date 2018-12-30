@@ -24,7 +24,7 @@ class CLexer:
 
     def __init__(self, input):
         
-        self.line_no = 0
+        self.line_no = 1
         self.line_pos = 0
         self.token_value = None    
         self.tokens = [] 
@@ -47,7 +47,7 @@ class CLexer:
                 #while c in CLexer.WHITESPACE and not input.NO_MORE_CHARS():
                 if c in CLexer.NEWLINE:
                     self.line_no += 1
-                    self.line_pos = 0
+                    self.line_pos = 1
 
                 c = self.getchar()
                 input.ii_mark_prev()

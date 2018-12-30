@@ -49,7 +49,7 @@ class CInput:
     END = BUFSIZE                               # just past last char in buf
 
     # Input Buffer
-    InputBuf = array.array('B', [46 for x in range(BUFSIZE)]) 
+    InputBuf = array.array('B', [36 for x in range(BUFSIZE)]) 
 
     LBufEnd = END  # logical buffer end...just past last char
     Next    = END   # Next input char
@@ -67,7 +67,7 @@ class CInput:
     Mline       = 1     # Line # when mark_end() is called
     Termchar    = 0     # holds the char that was overwritten by \0 when last char is null terminated
 
-    been_called = False
+    been_called = True
     EOF         = True  # constant
     ''' 
     End of file has been read. It's possible for this to be true 
@@ -341,13 +341,13 @@ class CInput:
         start-of-line anchor-a mechanism for recognizing strings only if they appear 
         at the far left of a line. Such strings must be preceded by a newline, so an 
         extra newline has to be appended in front of the first line of the file; otherwise, 
-        the anchored expression wouldn't be recognized on the first line.4
+        the anchored expression wouldn't be recognized on the first line.
         '''
         self.Next = self.sMark = self.eMark = self.END - 1
         
         # str
         # does this add to next or end of buffer
-        # self.InputBuf[self.Next] + '*' #\n'
+        # self.InputBuf[self.Next] = '\n'
         
         # byte array 
         # *Next = '\n'
@@ -366,8 +366,9 @@ class CInput:
     def DANGER(self):
         return self.LBufEnd - self.MAXLOOK
 
+# last change
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next > self.LBufEnd):
+        if (self.EOF_Read and self.Next >= self.LBufEnd):
             return True
         return False
     #---------------------------------------------------
@@ -514,8 +515,7 @@ class CInput:
 
         need = int((( self.END  - starting_at) / self.MAXLEX) * self.MAXLEX)
 
-        print(f'################# Fill Buffer #################')
-        print(f'################# Buffer can receive {need} bytes')
+        print(f'################# Filling Buffer with {need} bytes')
 
         if (need < 0):
             print(f'INTERNAL ERROR ii_filBuf() : Bad rea-request starting addr. \n')
