@@ -583,7 +583,7 @@ class CInput:
 
 
     #------------------------------------------------
-    #Pushback(n) is passed the number of characters to push back. 
+    # Pushback(n) is passed the number of characters to push back. 
     # For example, ii_pushback(5) pushes back the five most recently read characters. 
     # If you try to push past the sMark, only the characters as far as the sMark are 
     # pushed and 0 is returned (1 is returned on a successful push). If you push past the eMark, 

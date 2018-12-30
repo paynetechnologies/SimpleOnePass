@@ -14,5 +14,5 @@ if __name__ == '__main__':
     token = lexer.tokenizer(cinput)
 
     # on EOF, print the tokens    
-    for token in lexer.tokens:
-        print(token)
+    # for token in lexer.tokens:
+    #     print(token)
