@@ -100,6 +100,7 @@ class CInput:
     def read_funct(self, fd, starting_at, need):
 
         begin_seek_pos = fd.tell()
+        print(f'##### Begin Seek at {begin_seek_pos} into buffer at position {starting_at}')
 
         try:
             fd.readinto(CInput.MVInputBuf[starting_at:])
@@ -111,9 +112,7 @@ class CInput:
         
         got = min(fd.tell() - begin_seek_pos, need)
 
-        tell_less_seek = fd.tell() - begin_seek_pos
-
-        print(f'################# read_funct got {got} bytes = (fd.tell() - begin_seek {tell_less_seek}) vs need {need}')
+        print(f'##### read_funct got {got} bytes = vs need {need}' )
 
         print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:starting_at+ got]] ) )
 
@@ -468,7 +467,9 @@ class CInput:
             # and the distance that they have to be moved (shift_amt).
             copy_amt = self.LBufEnd - left_edge
 
-            self.copy(self.MVInputBuf, left_edge, copy_amt)
+            #self.copy(self.MVInputBuf, left_edge, copy_amt)
+
+            self.leftRotate2(self.MVInputBuf, left_edge, CInput.BUFSIZE)
 
             if (not self.ii_fillBuf(copy_amt)): 
                 print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
@@ -543,6 +544,7 @@ class CInput:
     #                      Copy Shift
     #---------------------------------------------------
     def copy(self, buf, left, amt):
+        self.printArray(buf, left)
         for i in range(amt):
             self.shiftContentsLeft(bytearray(buf), left)
         #self.printArray(buf,amt)
@@ -552,6 +554,31 @@ class CInput:
         for i in range(n-1): 
             arr[i] = arr[i + 1] 
 
+
+    #-- v2
+    # Python3 program to rotate an array by  
+    # d elements  
+    # Function to left rotate arr[] of size n by d*/ 
+    def leftRotate2(self, arr, d, n): 
+        self.printArray2(arr, n )
+        for i in range(d): 
+            self.leftRotatebyOne2(arr, n) 
+        self.printArray2(arr, n )
+
+
+    # Function to left Rotate arr[] of size n by 1*/  
+    def leftRotatebyOne2(self, arr, n): 
+        temp = 126
+        for i in range(n-1): 
+            arr[i] = arr[i + 1] 
+        arr[n-1] = temp 
+            
+    
+    # utility function to print an array */ 
+    def printArray2(self, arr, size): 
+        for i in range(size): 
+            print ("% s"% chr(arr[i]), end ="") 
+        print('##### END OF ARRAY')
 
 
     #---------------------------------------------------
@@ -687,20 +714,29 @@ class CInput:
         return self.ii_flush(1)
         
     def leftRotate(self,arr, d, n): 
+        self.printArray(arr, n)
         for i in range(d): 
             self.leftRotatebyOne(arr, n) 
     
     # Function to left Rotate arr[] of size n by 1*/  
     def leftRotatebyOne(self,arr, n): 
-        temp = arr[0] 
+        temp = chr(126)
         for i in range(n-1): 
             arr[i] = arr[i + 1] 
         arr[n-1] = temp 
             
     # utility function to print an array */ 
-    def printArray(self,arr, size): 
+    def printArrays(self,arr, size): 
         for i in range(size):
             print ("% d"% arr[i], end =" ") 
     
+    # utility function to print an array */ 
+    def printArray(self, arr, size): 
+        for i in range(size): 
+            print ("% s"% arr[i], end =" ") 
+
     def printBuf(self):
         print(''.join([chr(c) for c in self.MVInputBuf]))
+
+
+        
