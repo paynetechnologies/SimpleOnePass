@@ -46,10 +46,10 @@ class CInput:
     MAXLOOK = 16                               # max amount of lookahead
     MAXLEX  = 1024                             # max lexeme size
     BUFSIZE = (MAXLEX * 3) + (2 * MAXLOOK)     # Change the 3 only
-    END = BUFSIZE                               # just past last char in buf
+    END = BUFSIZE                              # just past last char in buf
 
     # Input Buffer
-    InputBuf = array.array('B', [36 for x in range(BUFSIZE)]) 
+    InputBuf = array.array('B', [126 for x in range(BUFSIZE)]) 
 
     LBufEnd = END  # logical buffer end...just past last char
     Next    = END   # Next input char
@@ -368,7 +368,7 @@ class CInput:
 
 # last change
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next >= self.LBufEnd):
+        if (self.EOF_Read and self.Next > self.LBufEnd):
             return True
         return False
     #---------------------------------------------------
@@ -437,7 +437,6 @@ class CInput:
             return 1
 
         if (self.Next >= self.DANGER() or force):        
-
             left_edge = min(self.sMark, self.pMark) if self.pMark > 0 else self.sMark
             
             shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - 

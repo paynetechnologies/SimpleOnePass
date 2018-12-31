@@ -59,9 +59,9 @@ class Token(object):
         self.value = value
         #self.line = line
         self.line_no = line_no
-        self.line_pos = line_pos - len(value)
+        self.line_pos = line_pos # - len(value)
         
-    def __str__(self):\
+    def __str__(self):
         #recent change
         #return '{0}:{1}'.format(self.line_no + 1, self.line_pos).ljust(10) + self.type.ljust(15) + self.value
         return '{0}:{1}'.format(self.line_no, self.line_pos).ljust(10) + self.type.ljust(15) + self.value

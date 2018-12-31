@@ -8,6 +8,7 @@ class CLexer:
 
     EOF_MARKER = '$'
     WHITESPACE = ' \t\r\n'
+    TAB = '\t'
     NEWLINE = '\n'
     COMMENT_MARKER = '#'
     HTML_COMMENT = '<!--'
@@ -44,10 +45,11 @@ class CLexer:
 
             # whitespace
             if c in CLexer.WHITESPACE:
-                #while c in CLexer.WHITESPACE and not input.NO_MORE_CHARS():
                 if c in CLexer.NEWLINE:
                     self.line_no += 1
-                    self.line_pos = 1
+                    self.line_pos = 0
+                elif c in CLexer.TAB:
+                    self.line_pos += 3
 
                 c = self.getchar()
                 input.ii_mark_prev()
@@ -88,19 +90,22 @@ class CLexer:
 
                     token = Token(Token.HTML_COMMENT, match, self.line_no, self.line_pos)
                     self.tokens.append(token) 
+                    if match == '<!-- PDIM Service URL -->':
+                        pass
 
                 # Less Than < sign
                 else:
                     token = Token(Token.LESS_THAN, c, self.line_no, self.line_pos)
                     self.tokens.append(token)       
-
-                c = self.getchar()
+                    c = self.getchar()
+    
                 input.ii_mark_prev()
                 input.ii_mark_start()                     
 
             # identifier
             elif c.isalpha(): #in string.ascii_letters:
                 match = c
+                token = Token(Token.IDENT, match, self.line_no, self.line_pos)
                 c = self.getchar()
 
                 while c.isalnum() and not input.NO_MORE_CHARS(): #in string.ascii_letters:
@@ -110,7 +115,7 @@ class CLexer:
                         self.line_pos = 0                      
                     c = self.getchar()
 
-                token = Token(Token.IDENT, match, self.line_no, self.line_pos)
+                token.value = match
                 self.tokens.append(token)
 
                 input.ii_mark_prev()
@@ -133,7 +138,6 @@ class CLexer:
 
                 token = Token(Token.NUM, match, self.line_no, self.line_pos)
                 self.tokens.append(token)                   
-                # return Token.NUM    
         
                 input.ii_mark_prev()
                 input.ii_mark_start()                 
@@ -229,10 +233,10 @@ class CLexer:
         self.tokens.append(token) 
 
 if __name__ == '__main__':
-    cinput = CInput('./src/test_files/web.config2')
+    cinput = CInput('./src/test_files/web.config5')
     lexer = CLexer(cinput)
     token = lexer.tokenizer(cinput)
 
     # on EOF, print the tokens    
-    # for token in lexer.tokens:
-    #     print(token)
+    for token in lexer.tokens:
+        print(token)
