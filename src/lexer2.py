@@ -125,3 +125,12 @@ class Lexer(object):
         self.tokens.append(token)
 
         return self.tokens
+
+
+if __name__ == '__main__':
+    lexer = Lexer('Abc + Bcd = Cde')
+    token = lexer.tokenise()        
+
+    # on EOF, print the tokens    
+    for token in lexer.tokens:
+        print(token)

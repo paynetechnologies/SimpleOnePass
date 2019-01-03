@@ -1,15 +1,16 @@
 import sys
-from src.parser import parser
-from src.init import init
+import string
 
-def main():
-    init()
-    p = parser( 'A + B' )
-    #p = parser( 'A + B + (C * D)' )
-    #p = parser( '(A * B) + (C * D)' )
-    #p = parser( '(E + F) * (G + H)' )
-    p.parse()
-
+from src.CInput import CInput
+from src.CLexer import CLexer
+from src.token import Token
 
 if __name__ == '__main__':
-    main()
+    
+    cinput = CInput('./src/test_files/web.config2')
+    lexer = CLexer(cinput)
+    token = lexer.tokenizer(cinput)
+
+    # on EOF, print the tokens    
+    for token in lexer.tokens:
+        print(token)

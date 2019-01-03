@@ -1,0 +1,52 @@
+<configuration>
+	<configSections>
+		<section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net"/>
+		<!--2 - SubSonic section handler-->
+		<section name="SubSonicService" type="SubSonic.SubSonicSection, SubSonic"/>
+	</configSections>
+	<appSettings>
+		<add key="ConsoleVersion" value="2.17 Integration/Mode"/>
+		<add key="CurrentZone" value="Integration"/>
+		<add key="AdminEmail" value="no-reply@ao.uscourts.gov"/>
+		<add key="ProxyServer" value="webmon.ao.dcn"/>
+		<add key="ProxyServerPort" value="80"/>
+		<add key="DeployMode" value="Development"/>
+		<add key="CurrentDevDB" value="uspps"/>
+		<add key="PACTSServer" value="fppsint"/>
+		<add key="BioKeySiteID" value="323700"/>
+		<add key="BioKeyAdminID" value="adminID"/>
+		<add key="httpreferercheck" value="false"/>
+		<add key="AllowStub" value="true"/>
+		<add key="PACTSUrl" value="fppsint.gtwy.dcn"/>
+		<add key="DOC_IMAGE_WEB" value="https://fppsint.gtwy.dcn:8443/ersintegration/dim/"/>
+		<add key="DOC_IMAGE_FTP" value="fppsint.gtwy.dcn"/>
+		<add key="RClientAddressService.ClientAddressService" value="http://156.132.10.122:8180/broker/ClientAddressService"/>
+		<add key="RClientContactInfoService.ContactInfoService" value="http://156.132.10.122:8180/broker/ContactInfoService"/>
+		<add key="RClientEmploymentService.EmploymentService" value="http://156.132.10.122:8180/broker/EmploymentService"/>
+		<add key="RClientVehicleService.ClientService" value="http://156.132.10.122:8180/broker/ClientService"/>
+		<add key="RClientAddressService.ClientAddressService" value="http://156.132.10.122:8180/broker/ClientAddressService"/>
+		<add key="Services_ChronoG2URL" value="http://usppsesb-int.chnt.gtwy.dcn:8443/pacts-webservices-1.1/http/pacts-ws/Chrono"/>
+		<!-- for Chrono G2 Service-->
+		<add key="ChronoPACTSUser" value="ERS"/>
+		<add key="ChronoPACTSPass" value="lyzfhjjlzz"/>
+		<add key="CurrentG3" value="usppsers"/>
+		<add key="DOC_IMAGE_WEB_G3" value="https://fppsint.gtwy.dcn:8443/ersintegration/dim/"/>
+		<add key="DOC_IMAGE_FTP_G3" value="fppsint.gtwy.dcn"/>
+		<add key="DOC_IMAGE_USER_G3" value="eppsgen3"/>
+		<add key="DOC_IMAGE_PWD_G3" value="4imaging"/>
+		<add key="PACTSPROVIDER" value="Provider=Ifxoledbc.2;"/>
+		<add key="PACTSG2" value="Password=kiosk!2008;User ID=ao_ers_user"/>
+		<add key="RClientAddressService_G3" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-broker/clientaddressservice"/>
+		<add key="RClientContactInfoService_G3" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-broker/contactinfoservice"/>
+		<add key="RClientEmploymentService_G3" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-broker/employmentservice"/>
+		<add key="RClientVehicleService_G3" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-broker/clientservice"/>
+		<add key="Services_DistrictConfigurationURL" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-rest/gen3config/"/>
+		<add key="Services_ChronoG3URL" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-soap/chronosservice"/>
+		<!-- PDIM Service URL -->
+		<add key="PDIMServiceUrl" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-rest/"/>
+    
+    <!--ERSDEMO-4936-->
+    <!--Template service url-->
+    <!--<add key="TemplateServiceBaseUrl" value="https://ts-int.opps.gtwy.dcn/esb/"/>-->
+		<!--<add key="serviceZone" value="train"/>-->
+    <!--END ERSDEMO-4936-->

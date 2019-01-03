@@ -1,0 +1,28 @@
+# Python3 program to rotate an array by  
+# d elements  
+# Function to left rotate arr[] of size n by d*/ 
+def leftRotate(arr, d, n): 
+    for i in range(d): 
+        leftRotatebyOne(arr, n) 
+  
+# Function to left Rotate arr[] of size n by 1*/  
+def leftRotatebyOne(arr, n): 
+    temp = arr[0] #chr(126)
+    for i in range(n-1): 
+        arr[i] = arr[i + 1] 
+    arr[n-1] = temp 
+          
+  
+# utility function to print an array */ 
+def printArray(arr, size): 
+    for i in range(size): 
+        print ("%s"% arr[i], end =" ") 
+  
+
+  
+# This code is contributed by Shreyanshi Arun 
+if __name__ == '__main__':
+    # Driver program to test above functions */ 
+    arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] 
+    leftRotate(arr, 9, 20) 
+    printArray(arr, 20) 
