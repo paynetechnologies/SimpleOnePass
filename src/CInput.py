@@ -50,6 +50,8 @@ class CInput:
 
     # Input Buffer
     InputBuf = array.array('B', [126 for x in range(BUFSIZE)]) 
+    
+    MVInputBuf = memoryview(InputBuf)           # Memoryview of Input Buffer    
 
     LBufEnd = END  # logical buffer end...just past last char
     Next    = END   # Next input char
@@ -77,8 +79,6 @@ class CInput:
     
     ii_io = {}                                  # pointers to Open, Read, Close functions
 
-    MVInputBuf = memoryview(InputBuf)           # Memoryview of Input Buffer    
-
 
 
     def __init__(self, fileName ):
@@ -100,21 +100,26 @@ class CInput:
     def read_funct(self, fd, starting_at, need):
 
         begin_seek_pos = fd.tell()
-        print(f'##### Begin Seek at {begin_seek_pos} into buffer at position {starting_at}')
+        print(f'##### read_funct :: Begin Seek at pos: {begin_seek_pos}')
 
         try:
+            print(f'##### read_funct :: Read into MVInputBuf starting at pos: {starting_at}')
             fd.readinto(CInput.MVInputBuf[starting_at:])
         except EOFError:
             CInput.EOF_Read = True
         except Exception as e :
-            #print(f"Unexpected error : {e}", sys.exc_info()[0])
             raise ValueError(f"READ Unexpected error : {e}", sys.exc_info()[0])
         
         got = min(fd.tell() - begin_seek_pos, need)
 
-        print(f'##### read_funct got {got} bytes = vs need {need}' )
+        #print(f'##### read_funct :: Read {got} bytes = vs need {need}' )
+        print(f'##### read_funct :: {got} bytes' )
 
-        print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:starting_at+ got]] ) )
+        print(f'##### read_funct :: Dumping MVInputBuf from {starting_at} to got {starting_at + got}' )
+        print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:starting_at + got]] ) )
+
+        # print(f'##### read_funct :: Dumping MVInputBuf from 1 to got {starting_at + got}' )
+        # print( ''.join( [chr(c) for c in CInput.MVInputBuf[1:starting_at + got]] ) )
 
         return got
 
@@ -351,7 +356,7 @@ class CInput:
         # byte array 
         # *Next = '\n'
         # self.membuf[self.Next] = '\n'
-        self.MVInputBuf[self.Next] =  ord(b'\n')
+        CInput.MVInputBuf[self.Next] =  ord(b'\n')
 
         self.Lineno -= 1
         self.Mline -= 1
@@ -365,9 +370,8 @@ class CInput:
     def DANGER(self):
         return self.LBufEnd - self.MAXLOOK
 
-# last change
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next > self.LBufEnd):
+        if (self.EOF_Read and self.Next >= self.LBufEnd):
             return True
         return False
     #---------------------------------------------------
@@ -391,10 +395,10 @@ class CInput:
         if (not self.EOF_Read and (self.ii_flush(needFlush) < 0)):
             return -1
 
-        if (self.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
+        if (CInput.MVInputBuf[self.Next] == ord('\n')): # if *Next = '\n' 
             self.Lineno += 1
 
-        c = self.MVInputBuf[self.Next]
+        c = CInput.MVInputBuf[self.Next]
 
         self.Next +=1
         return (c)
@@ -469,7 +473,13 @@ class CInput:
 
             #self.copy(self.MVInputBuf, left_edge, copy_amt)
 
-            self.leftRotate2(self.MVInputBuf, left_edge, CInput.BUFSIZE)
+            #self.leftRotate3(CInput.MVInputBuf, left_edge, CInput.BUFSIZE)
+            if copy_amt > 0:
+                #self.shift(CInput.MVInputBuf,left_edge)
+                arr = array.array('B', CInput.MVInputBuf)
+                arr = self.left_rotation(arr,left_edge)
+                CInput.MVInputBuf = memoryview(arr)
+
 
             if (not self.ii_fillBuf(copy_amt)): 
                 print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
@@ -515,8 +525,6 @@ class CInput:
 
         need = int((( self.END  - starting_at) / self.MAXLEX) * self.MAXLEX)
 
-        print(f'################# Filling Buffer with {need} bytes')
-
         if (need < 0):
             print(f'INTERNAL ERROR ii_filBuf() : Bad rea-request starting addr. \n')
             return -1
@@ -526,14 +534,12 @@ class CInput:
 
         # do the read
         got = self.ii_io["readp"](self.inpFile, starting_at, need)
-        print(f'################# call to read_funct returned {got} bytes ')
 
         if (got == None):
             print(f"Can't read input file. \n")
             return -1
 
         self.LBufEnd = starting_at + got
-        print(f'################# self.LBufEnd is {self.LBufEnd} ')
 
         if (got < need):
             self.EOF_Read = True
@@ -543,6 +549,13 @@ class CInput:
     #---------------------------------------------------
     #                      Copy Shift
     #---------------------------------------------------
+    def left_rotation(self, a, k):
+        # if the size of k > len(a), rotate only necessary with
+        # module of the division
+        rotations = k % len(a)
+        return a[rotations:] + a[:rotations]
+
+
     def copy(self, buf, left, amt):
         self.printArray(buf, left)
         for i in range(amt):
@@ -560,11 +573,30 @@ class CInput:
     # d elements  
     # Function to left rotate arr[] of size n by d*/ 
     def leftRotate2(self, arr, d, n): 
-        self.printArray2(arr, n )
+        print(f'================== 1 before ==============')
+        self.printArray2(arr, n)
+        print(f'================== 1 end ================')
         for i in range(d): 
             self.leftRotatebyOne2(arr, n) 
-        self.printArray2(arr, n )
+        print(f'================== 2 after ==============')
+        self.printArray2(arr, n - d)        
+        print(f'================== 2 end ================')
 
+    #-- v2
+    # Python3 program to rotate an array by  
+    # d elements  
+    # Function to left rotate arr[] of size n by d*/ 
+    def leftRotate3(self, arr, d, n): 
+
+        print(f'================== arr ==============')
+        self.printArray2(arr, n)
+
+        CInput.InputBuf = CInput.InputBuf[d:] 
+        c = arr[d:]
+        print(f'================== c ================ len c = {len(c)}')
+        self.printArray2(c,len(c))
+
+        return c
 
     # Function to left Rotate arr[] of size n by 1*/  
     def leftRotatebyOne2(self, arr, n): 
@@ -572,7 +604,19 @@ class CInput:
         for i in range(n-1): 
             arr[i] = arr[i + 1] 
         arr[n-1] = temp 
-            
+
+    def shift(self, arr, d):
+        start = time.time()
+        arr2 = array.array('B', arr)
+        while d:
+            arr2 = arr2[1:]
+            if d == 1:
+                print('one')
+            d -= 1
+        print(f'random memoryview {d} {time.time()-start}')
+        CInput.MVInputBuf = memoryview(arr2)
+
+
     
     # utility function to print an array */ 
     def printArray2(self, arr, size): 
@@ -605,7 +649,7 @@ class CInput:
             return self.EOF
 
         #return 0 if (p < self.MVInputBuf or p >= self.LBufEnd) else self.MVInputBuf[p]
-        return 0 if (p < 0 or p >= self.LBufEnd) else self.MVInputBuf[p]
+        return 0 if (p < 0 or p >= self.LBufEnd) else CInput.MVInputBuf[p]
 
 
     #------------------------------------------------
@@ -625,7 +669,7 @@ class CInput:
         n -= 1
         while ( n >= 0 and self.Next > self.sMark):
             
-            if( self.MVInputBuf[self.Next] == '\n' or self.Next == 0):
+            if( CInput.MVInputBuf[self.Next] == '\n' or self.Next == 0):
                 self.Lineno -= 1
             
             n -= 1
@@ -655,12 +699,12 @@ class CInput:
         Saves the character pointed to by Next in a variable called Termchar, 
         and then overwrites the character with a' \0'.
         '''
-        self.Termchar = self.MVInputBuf[self.Next]
-        self.MVInputBuf[self.Next] = b'\0'
+        self.Termchar = CInput.MVInputBuf[self.Next]
+        CInput.MVInputBuf[self.Next] = b'\0'
 
     def ii_unterm(self):
         if( self.Termchar):
-            self.MVInputBuf[self.Next] = self.Termchar
+            CInput.MVInputBuf[self.Next] = self.Termchar
             self.Termchar = 0
 
     def ii_input(self):
@@ -686,11 +730,11 @@ class CInput:
         if(self.Termchar):
             self.ii_unterm()
             if( self.ii_pushback(1) ):
-                self.MVInputBuf[self.Next] = bytes(c)
+                CInput.MVInputBuf[self.Next] = bytes(c)
                 self.ii_term()
         else:
             if( self.ii_pushback(1)):
-                self.MVInputBuf[self.Next] = bytes(c)
+                CInput.MVInputBuf[self.Next] = bytes(c)
 
     #-------------------------------------
     # 
@@ -713,6 +757,7 @@ class CInput:
             self.ii_unterm()
         return self.ii_flush(1)
         
+
     def leftRotate(self,arr, d, n): 
         self.printArray(arr, n)
         for i in range(d): 
@@ -736,7 +781,7 @@ class CInput:
             print ("% s"% arr[i], end =" ") 
 
     def printBuf(self):
-        print(''.join([chr(c) for c in self.MVInputBuf]))
+        print(''.join([chr(c) for c in CInput.MVInputBuf]))
 
 
         
