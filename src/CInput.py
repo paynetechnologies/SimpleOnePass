@@ -371,7 +371,7 @@ class CInput:
         return self.LBufEnd - self.MAXLOOK
 
     def NO_MORE_CHARS(self):
-        if (self.EOF_Read and self.Next >= self.LBufEnd):
+        if (self.EOF_Read and self.Next > self.LBufEnd):
             return True
         return False
     #---------------------------------------------------
@@ -431,7 +431,7 @@ class CInput:
         buffer that's been terminated by ii_term()
         '''
         copy_amt = shift_amt = 0
-        left_edge = None
+        left_edge = 0
 
         if (self.NO_MORE_CHARS()):
             return 0
@@ -442,7 +442,7 @@ class CInput:
         if (self.Next >= self.DANGER() or force):        
             left_edge = min(self.sMark, self.pMark) if self.pMark > 0 else self.sMark
             
-            shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - 
+            shift_amt = left_edge - 0
 
             #---------------------------------------------------
             # Test to see that there will be enough room after the move to load a new 
@@ -471,15 +471,10 @@ class CInput:
             # and the distance that they have to be moved (shift_amt).
             copy_amt = self.LBufEnd - left_edge
 
-            #self.copy(self.MVInputBuf, left_edge, copy_amt)
-
-            #self.leftRotate3(CInput.MVInputBuf, left_edge, CInput.BUFSIZE)
             if copy_amt > 0:
-                #self.shift(CInput.MVInputBuf,left_edge)
                 arr = array.array('B', CInput.MVInputBuf)
                 arr = self.left_rotation(arr,left_edge)
                 CInput.MVInputBuf = memoryview(arr)
-
 
             if (not self.ii_fillBuf(copy_amt)): 
                 print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
