@@ -89,6 +89,7 @@ class CLexer:
                     and (chr(input.ii_look(2)) == CLexer.DASH) \
                     and (chr(input.ii_look(3)) == CLexer.DASH):
                    
+                    start_line_no = self.line_no
                     while True and not input.NO_MORE_CHARS():
                         c = self.getchar()
                         match += c                                                                
@@ -105,15 +106,15 @@ class CLexer:
                             match += c
                             break
 
-                    token = Token(Token.HTML_COMMENT, match, self.line_no, self.line_pos)
+                    token = Token(Token.HTML_COMMENT, match, start_line_no, self.line_pos)
                     self.tokens.append(token) 
                     if match == '<!-- PDIM Service URL -->':
                         pass
 
                 # start tag <abc...
-                elif (chr(input.ii_look(1)).isalpha()):
-                    token = Token(Token.START_TAG, c, self.line_no, self.line_pos)
-                    self.tokens.append(token)
+                # elif (chr(input.ii_look(1)).isalpha()):
+                #     token = Token(Token.START_TAG, c, self.line_no, self.line_pos)
+                #     self.tokens.append(token)
 
                 # end node </abc...
                 elif (chr(input.ii_look(1)) == CLexer.FORWARD_SLASH):
@@ -174,7 +175,7 @@ class CLexer:
             # Greater Than > sign
             elif c in CLexer.GREATER_THAN:
 
-                token = Token(Token.END_TAG, c, self.line_no, self.line_pos)
+                token = Token(Token.GREATER_THAN, c, self.line_no, self.line_pos)
                 self.tokens.append(token)      
 
                 c = self.getchar()
