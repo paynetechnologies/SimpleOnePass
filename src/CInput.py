@@ -80,11 +80,9 @@ class CInput:
     ii_io = {}                                          # pointers to Open, Read, Close functions
 
 
-
     def __init__(self, input_filename ):
         self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
         self.ii_newfile(input_filename)         
-
 
 
     #---------------------------------------------------
@@ -371,6 +369,7 @@ class CInput:
             self.close_funct()
             return True
         return False
+        
     #---------------------------------------------------
     #                      Advance & Flush
     #---------------------------------------------------
@@ -484,6 +483,8 @@ class CInput:
             self.Next -= shift_amt
 
         return 1
+
+
     #--------------------------------------------
     # Pass a base address, and load as many MAXLEX-sized chunks into the buffur as will fit. 
     # The need variable is the amount needed. The logical-end-of-buffer marker is adjusted 
@@ -537,33 +538,6 @@ class CInput:
             self.EOF_Read = True
 
         return got
-            
-    #---------------------------------------------------
-    #                      Copy Shift
-    #---------------------------------------------------
-    def left_rotation(self, a, k):
-        # if the size of k > len(a), rotate only necessary with
-        # module of the division
-        rotations = k % len(a)
-        return a[rotations:] + a[:rotations]
-
-
-    def copy(self, buf, left, amt):
-        self.printArray(buf, left)
-        for i in range(amt):
-            self.shiftContentsLeft(bytearray(buf), left)
-        #self.printArray(buf,amt)
-    
-    # Function to left Rotate arr[] of size n by 1*/  
-    def shiftContentsLeft(self, arr, n): 
-        for i in range(n-1): 
-            arr[i] = arr[i + 1] 
-
-    # utility function to print an array */ 
-    def printArray2(self, arr, size): 
-        for i in range(size): 
-            print ("% s"% chr(arr[i]), end ="") 
-        print('##### END OF ARRAY')
 
 
     #---------------------------------------------------
@@ -589,7 +563,6 @@ class CInput:
         if (self.EOF_Read and p >= self.LBufEnd):
             return self.EOF
 
-        #return 0 if (p < self.MVInputBuf or p >= self.LBufEnd) else self.MVInputBuf[p]
         return 0 if (p < 0 or p >= self.LBufEnd) else CInput.MVInputBuf[p]
 
 
@@ -620,6 +593,7 @@ class CInput:
             self.Mline = self.Lineno
             
         return( self.Next > self.sMark )    
+
 
     #---------------------------------------------------
     #                      Terminate Unterminate
@@ -677,9 +651,6 @@ class CInput:
             if( self.ii_pushback(1)):
                 CInput.MVInputBuf[self.Next] = bytes(c)
 
-    #-------------------------------------
-    # 
-    #--------------------------------------
     def ii_lookahead(self, n ):
         '''
         The ii_lookahead() function bears the same relation to ii_look() that 
@@ -697,11 +668,19 @@ class CInput:
         if (self.Termchar is not None):    
             self.ii_unterm()
         return self.ii_flush(1)
-        
+
+    #---------------------------------------------------
+    #                      Copy Shift
+    #---------------------------------------------------
+    def left_rotation(self, a, k):
+        # if the size of k > len(a), rotate only necessary with
+        # module of the division
+        rotations = k % len(a)
+        return a[rotations:] + a[:rotations]
 
     def leftRotate(self,arr, d, n): 
-        self.printArray(arr, n)
-        for i in range(d): 
+        self.printArrays(arr, n)
+        for _ in range(d): 
             self.leftRotatebyOne(arr, n) 
     
     # Function to left Rotate arr[] of size n by 1*/  
@@ -711,18 +690,21 @@ class CInput:
             arr[i] = arr[i + 1] 
         arr[n-1] = temp 
             
+    #-------------------------------------
+    #              PRINT
+    #--------------------------------------
+    #             
     # utility function to print an array */ 
-    def printArrays(self,arr, size): 
+    def printArrays(self, arr, size): 
         for i in range(size):
             print ("% d"% arr[i], end =" ") 
-    
+            #print ("% s"% arr[i], end =" ")     
+
     # utility function to print an array */ 
-    def printArray(self, arr, size): 
+    def printArray2(self, arr, size): 
         for i in range(size): 
-            print ("% s"% arr[i], end =" ") 
+            print ("% s"% chr(arr[i]), end ="") 
+        print('##### END OF ARRAY')
 
     def printBuf(self):
         print(''.join([chr(c) for c in CInput.MVInputBuf]))
-
-
-        
