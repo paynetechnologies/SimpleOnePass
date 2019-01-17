@@ -144,7 +144,7 @@ class Token(object):
     # t_RPAREN  = r'\)'    
 
 
-
+    # this def with lexer.py
     #def __init__(self, type, value, line, line_no, line_pos):
     def __init__(self, type, value, line_no, line_pos):        
         self.type = type
@@ -156,9 +156,6 @@ class Token(object):
     def __str__(self):
         #recent change
         #return '{0}:{1}'.format(self.line_no + 1, self.line_pos).ljust(10) + self.type.ljust(15) + self.value
-<<<<<<< HEAD
-        return '{0}:{1}'.format(self.line_no, self.line_pos).ljust(10) + self.type.ljust(15) + self.value
-=======
         #return '{0}:{1}'.format(self.line_no, self.line_pos).ljust(10) + self.type.ljust(15) + self.value
         return '{0}:{1}'.format(self.line_no, self.line_pos).ljust(10) + self.type.ljust(15) + self.value        
 
@@ -167,4 +164,3 @@ class Token(object):
         r'\d+'
         t.value = int(t.value)
         return t        
->>>>>>> 172fc58d3eb528de6034d0fd617ed60a2e844d72
