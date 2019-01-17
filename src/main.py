@@ -7,7 +7,7 @@ from src.token import Token
 
 if __name__ == '__main__':
     
-    cinput = CInput('./src/test_files/web.config2')
+    cinput = CInput('./src/test_files/web.config')
     lexer = CLexer(cinput)
     token = lexer.tokenizer(cinput)
 

@@ -44,7 +44,6 @@
 		<add key="Services_ChronoG3URL" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-soap/chronosservice"/>
 		<!-- PDIM Service URL -->
 		<add key="PDIMServiceUrl" value="https://usppsesb-int.chnt.gtwy.dcn:8443/uspps-rest/"/>
-    
     <!--ERSDEMO-4936-->
     <!--Template service url-->
     <!--<add key="TemplateServiceBaseUrl" value="https://ts-int.opps.gtwy.dcn/esb/"/>-->

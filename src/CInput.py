@@ -76,15 +76,13 @@ class CInput:
     and for characters to still be in the input buffer.
     '''
     EOF_Read    = False 
-    
-    ii_io = {}                                  # pointers to Open, Read, Close functions
+    fd = None                                           # file descriptor
+    ii_io = {}                                          # pointers to Open, Read, Close functions
 
 
-
-    def __init__(self, fileName ):
+    def __init__(self, input_filename ):
         self.ii_ii(self.open_funct, self.close_funct, self.read_funct)
-        self.ii_newfile(fileName)         
-
+        self.ii_newfile(input_filename)         
 
 
     #---------------------------------------------------
@@ -94,32 +92,28 @@ class CInput:
         fd=open(filename, mode, encoding=encoding)
         return fd
 
-    def close_funct(self, fd):
-        fd.close()
+    def close_funct(self):
+        self.fd.close()
 
     def read_funct(self, fd, starting_at, need):
 
         begin_seek_pos = fd.tell()
-        print(f'##### read_funct :: Begin Seek at pos: {begin_seek_pos}')
+        print(f'##### read_funct :: Seek at pos: {begin_seek_pos}')
 
         try:
             print(f'##### read_funct :: Read into MVInputBuf starting at pos: {starting_at}')
             fd.readinto(CInput.MVInputBuf[starting_at:])
         except EOFError:
             CInput.EOF_Read = True
+            self.close_funct()
         except Exception as e :
             raise ValueError(f"READ Unexpected error : {e}", sys.exc_info()[0])
         
         got = min(fd.tell() - begin_seek_pos, need)
-
-        #print(f'##### read_funct :: Read {got} bytes = vs need {need}' )
         print(f'##### read_funct :: {got} bytes' )
 
         print(f'##### read_funct :: Dumping MVInputBuf from {starting_at} to got {starting_at + got}' )
         print( ''.join( [chr(c) for c in CInput.MVInputBuf[starting_at:starting_at + got]] ) )
-
-        # print(f'##### read_funct :: Dumping MVInputBuf from 1 to got {starting_at + got}' )
-        # print( ''.join( [chr(c) for c in CInput.MVInputBuf[1:starting_at + got]] ) )
 
         return got
 
@@ -188,7 +182,6 @@ class CInput:
         though.
         '''
         if(fd != 0):   
-            #print(type(fd))
 
             if self.inpFile != self.STDIN:
                 self.ii_io["closep"](self.inpFile)
@@ -202,6 +195,7 @@ class CInput:
             self.LBufEnd    = self.END
             self.Lineno    = 1
             self.Mline     = 1
+            self.fd = fd
 
         return fd
 
@@ -370,11 +364,12 @@ class CInput:
     def DANGER(self):
         return self.LBufEnd - self.MAXLOOK
 
-# last change
     def NO_MORE_CHARS(self):
         if (self.EOF_Read and self.Next > self.LBufEnd):
+            self.close_funct()
             return True
         return False
+        
     #---------------------------------------------------
     #                      Advance & Flush
     #---------------------------------------------------
@@ -432,7 +427,7 @@ class CInput:
         buffer that's been terminated by ii_term()
         '''
         copy_amt = shift_amt = 0
-        left_edge = None
+        left_edge = 0
 
         if (self.NO_MORE_CHARS()):
             return 0
@@ -443,7 +438,7 @@ class CInput:
         if (self.Next >= self.DANGER() or force):        
             left_edge = min(self.sMark, self.pMark) if self.pMark > 0 else self.sMark
             
-            shift_amt = left_edge - 0 # if using pointers: shift_amt = left_edge - 
+            shift_amt = left_edge - 0
 
             #---------------------------------------------------
             # Test to see that there will be enough room after the move to load a new 
@@ -472,10 +467,10 @@ class CInput:
             # and the distance that they have to be moved (shift_amt).
             copy_amt = self.LBufEnd - left_edge
 
-            #self.copy(self.MVInputBuf, left_edge, copy_amt)
-
-            #self.leftRotate3(CInput.MVInputBuf, left_edge, CInput.BUFSIZE)
-            self.shift(CInput.MVInputBuf,left_edge)
+            if copy_amt > 0:
+                arr = array.array('B', CInput.MVInputBuf)
+                arr = self.left_rotation(arr,left_edge)
+                CInput.MVInputBuf = memoryview(arr)
 
             if (not self.ii_fillBuf(copy_amt)): 
                 print(f"????? INTERNAL ERROR, ii_flush: Buffer full, can't read \n")
@@ -488,6 +483,8 @@ class CInput:
             self.Next -= shift_amt
 
         return 1
+
+
     #--------------------------------------------
     # Pass a base address, and load as many MAXLEX-sized chunks into the buffur as will fit. 
     # The need variable is the amount needed. The logical-end-of-buffer marker is adjusted 
@@ -541,74 +538,6 @@ class CInput:
             self.EOF_Read = True
 
         return got
-            
-    #---------------------------------------------------
-    #                      Copy Shift
-    #---------------------------------------------------
-    def copy(self, buf, left, amt):
-        self.printArray(buf, left)
-        for i in range(amt):
-            self.shiftContentsLeft(bytearray(buf), left)
-        #self.printArray(buf,amt)
-    
-    # Function to left Rotate arr[] of size n by 1*/  
-    def shiftContentsLeft(self, arr, n): 
-        for i in range(n-1): 
-            arr[i] = arr[i + 1] 
-
-
-    #-- v2
-    # Python3 program to rotate an array by  
-    # d elements  
-    # Function to left rotate arr[] of size n by d*/ 
-    def leftRotate2(self, arr, d, n): 
-        print(f'================== 1 before ==============')
-        self.printArray2(arr, n)
-        print(f'================== 1 end ================')
-        for i in range(d): 
-            self.leftRotatebyOne2(arr, n) 
-        print(f'================== 2 after ==============')
-        self.printArray2(arr, n - d)        
-        print(f'================== 2 end ================')
-
-    #-- v2
-    # Python3 program to rotate an array by  
-    # d elements  
-    # Function to left rotate arr[] of size n by d*/ 
-    def leftRotate3(self, arr, d, n): 
-
-        print(f'================== arr ==============')
-        self.printArray2(arr, n)
-
-        CInput.InputBuf = CInput.InputBuf[d:] 
-        c = arr[d:]
-        print(f'================== c ================ len c = {len(c)}')
-        self.printArray2(c,len(c))
-
-        return c
-
-    # Function to left Rotate arr[] of size n by 1*/  
-    def leftRotatebyOne2(self, arr, n): 
-        temp = 126
-        for i in range(n-1): 
-            arr[i] = arr[i + 1] 
-        arr[n-1] = temp 
-
-    def shift(self, arr, d):
-        start = time.time()
-        while d:
-            arr = arr[1:]
-            if d == 1:
-                print('one')
-            d -= 1
-        print(f'random memoryview {d} {time.time()-start}')
-
-    
-    # utility function to print an array */ 
-    def printArray2(self, arr, size): 
-        for i in range(size): 
-            print ("% s"% chr(arr[i]), end ="") 
-        print('##### END OF ARRAY')
 
 
     #---------------------------------------------------
@@ -634,7 +563,6 @@ class CInput:
         if (self.EOF_Read and p >= self.LBufEnd):
             return self.EOF
 
-        #return 0 if (p < self.MVInputBuf or p >= self.LBufEnd) else self.MVInputBuf[p]
         return 0 if (p < 0 or p >= self.LBufEnd) else CInput.MVInputBuf[p]
 
 
@@ -722,9 +650,6 @@ class CInput:
             if( self.ii_pushback(1)):
                 CInput.MVInputBuf[self.Next] = bytes(c)
 
-    #-------------------------------------
-    # 
-    #--------------------------------------
     def ii_lookahead(self, n ):
         '''
         The ii_lookahead() function bears the same relation to ii_look() that 
@@ -742,10 +667,19 @@ class CInput:
         if (self.Termchar is not None):    
             self.ii_unterm()
         return self.ii_flush(1)
-        
+
+    #---------------------------------------------------
+    #                      Copy Shift
+    #---------------------------------------------------
+    def left_rotation(self, a, k):
+        # if the size of k > len(a), rotate only necessary with
+        # module of the division
+        rotations = k % len(a)
+        return a[rotations:] + a[:rotations]
+
     def leftRotate(self,arr, d, n): 
-        self.printArray(arr, n)
-        for i in range(d): 
+        self.printArrays(arr, n)
+        for _ in range(d): 
             self.leftRotatebyOne(arr, n) 
     
     # Function to left Rotate arr[] of size n by 1*/  
@@ -755,18 +689,21 @@ class CInput:
             arr[i] = arr[i + 1] 
         arr[n-1] = temp 
             
+    #-------------------------------------
+    #              PRINT
+    #--------------------------------------
+    #             
     # utility function to print an array */ 
-    def printArrays(self,arr, size): 
+    def printArrays(self, arr, size): 
         for i in range(size):
             print ("% d"% arr[i], end =" ") 
-    
+            #print ("% s"% arr[i], end =" ")     
+
     # utility function to print an array */ 
-    def printArray(self, arr, size): 
+    def printArray2(self, arr, size): 
         for i in range(size): 
-            print ("% s"% arr[i], end =" ") 
+            print ("% s"% chr(arr[i]), end ="") 
+        print('##### END OF ARRAY')
 
     def printBuf(self):
         print(''.join([chr(c) for c in CInput.MVInputBuf]))
-
-
-        

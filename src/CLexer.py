@@ -5,22 +5,34 @@ from src.CInput import CInput
 from src.token import Token
 
 class CLexer:
+    
+    WHITESPACE      = ' \t\r\n'
+    TAB             = '\t'
+    NEWLINE         = '\n'
+    EOF_MARKER      = '$'
 
-    EOF_MARKER = '$'
-    WHITESPACE = ' \t\r\n'
-    TAB = '\t'
-    NEWLINE = '\n'
-    COMMENT_MARKER = '#'
-    HTML_COMMENT = '<!--'
-    LESS_THAN = '<'
-    GREATER_THAN = '>'
-    DASH = '-'
-    EXCLAMATION = '!'
-    QUOTE = '"'
-    TIC = "'"
-    MAX_QT_LEN = 256
-    OPERATORS = '+-*/=<>!'
-    PUNCTUATORS = '.?:[](),;#\'"_@\\\/~%'
+    COMMENT_MARKER  = '#'
+    HTML_COMMENT    = '<!--'    
+
+    LESS_THAN       = '<'   
+    GREATER_THAN    = '>'
+    EXCLAMATION     = '!'
+    EQUAL           = '='
+    NOT_EQUAL       = '!='
+    REL_OPERATORS   = '<>!='
+
+    OPERATORS       = '+-*/'
+    START_TAG       = '<[a..zA..z]+'
+    END_TAG         = '/>'
+    FORWARD_SLASH   = '/'
+    BACK_SLASH      = '\\'
+    
+    DASH            = '-'
+    QUOTE           = '"'
+    TIC             = "'"
+    MAX_QT_LEN      = 256
+  
+    PUNCTUATORS     = '.?:[](),;#\'"_@\\\/~%'
 
 
     def __init__(self, input):
@@ -69,13 +81,15 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start() 
 
-            # html comment <!-- -->
+            # < less than 
             elif c in CLexer.LESS_THAN:
                 match = c
+                # html comment <!-- -->
                 if  (chr(input.ii_look(1)) == CLexer.EXCLAMATION) \
                     and (chr(input.ii_look(2)) == CLexer.DASH) \
                     and (chr(input.ii_look(3)) == CLexer.DASH):
                    
+                    start_line_no = self.line_no
                     while True and not input.NO_MORE_CHARS():
                         c = self.getchar()
                         match += c                                                                
@@ -83,22 +97,38 @@ class CLexer:
                             self.line_no += 1
                             self.line_pos = 0                                
 
-                        if c in CLexer.GREATER_THAN \
-                        and (chr(input.ii_look(-1)) == CLexer.DASH) \
-                        and (chr(input.ii_look(-2)) == CLexer.DASH):
+                        elif (c in CLexer.DASH) \
+                        and (chr(input.ii_look(1)) == CLexer.DASH) \
+                        and (chr(input.ii_look(2)) == CLexer.GREATER_THAN):
+                            c = self.getchar()
+                            match += c  
+                            c = self.getchar()
+                            match += c
                             break
 
-                    token = Token(Token.HTML_COMMENT, match, self.line_no, self.line_pos)
+                    token = Token(Token.HTML_COMMENT, match, start_line_no, self.line_pos)
                     self.tokens.append(token) 
                     if match == '<!-- PDIM Service URL -->':
                         pass
 
-                # Less Than < sign
+                # start tag <abc...
+                # elif (chr(input.ii_look(1)).isalpha()):
+                #     token = Token(Token.START_TAG, c, self.line_no, self.line_pos)
+                #     self.tokens.append(token)
+
+                # end node </abc...
+                elif (chr(input.ii_look(1)) == CLexer.FORWARD_SLASH):
+                    c = self.getchar()
+                    match += c
+                    token = Token(Token.END_NODE, match, self.line_no, self.line_pos)
+                    self.tokens.append(token)                      
+    
+                # Operator Less Than < sign
                 else:
                     token = Token(Token.LESS_THAN, c, self.line_no, self.line_pos)
                     self.tokens.append(token)       
-                    c = self.getchar()
-    
+                    
+                c = self.getchar()
                 input.ii_mark_prev()
                 input.ii_mark_start()                     
 
@@ -169,15 +199,31 @@ class CLexer:
                 input.ii_mark_prev()
                 input.ii_mark_start()                    
 
-            # operators
+            # operators +=*/
             elif c in CLexer.OPERATORS:
+                match = c
+                if (chr(input.ii_look(1)) == CLexer.GREATER_THAN):
+                    c = self.getchar()    
+                    match += c
+                    token = Token(Token.END_TAG, match, self.line_no, self.line_pos)
+                    self.tokens.append(token)       
+                else:
+                    token = Token(Token.OPERATOR, c,  self.line_no, self.line_pos)
+                    self.tokens.append(token)
+                
+                c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start()         
 
-                token = Token(Token.OPERATOR, c,  self.line_no, self.line_pos)
+            # relational operators <>=!
+            elif c in CLexer.REL_OPERATORS:
+
+                token = Token(Token.REL_OP, c,  self.line_no, self.line_pos)
                 self.tokens.append(token)
                 
                 c = self.getchar()
                 input.ii_mark_prev()
-                input.ii_mark_start()                 
+                input.ii_mark_start()                         
 
             # punctuators
             elif c in CLexer.PUNCTUATORS:
