@@ -29,32 +29,6 @@ class Token(object):
     GREATER_THAN    = 'GT'
     DASH            = 'DASH'
     EXCLAMATION     = 'EXCLAMATION'
-<<<<<<< HEAD
-    
-    APPSETTING          = 'APPSETTING'    
-    CONFIGURATION       = 'CONFIGURATION'
-    CONFIGURATIONS      = 'CONFIGSECTIONS'
-    CONNECTIONSTRINGS   = 'CONNECTIONSTRINGS'
-    HTML_COMMENT        = 'COMMENT'
-    Name                = 'NAME'
-    SECTION             = 'SECTION'
-    SYSTEM_WEB          = 'SYSTEM_WEB'
-    SYSTEM_WEBSERVER    = 'SYSTEM_WEBSERVER'
-    SYSTEM_SERVICEMODEL = 'SYSTEM_SERVICEMODEL'
-    TYPE                = 'TYPE'
-
-    keywords    = ['if', 'else', 'elif', 'while']
-
-    quoted_identifiers = ['name', 'type', 'key', 'value']
-    QUOTEDIDENTKEYWORD = "QIDKEYWORD"
-    QUOTEDIDENT = "QID"
-
-    config_keywords   = ['configuration', 'configSections', 'appSettings',
-    'connectionStrings', 'system.web', 'system.webServer', 'system.serviceModel']
-
-    token_value = 0
-  
-=======
     
     APPSETTING          = 'APPSETTING'    
     CONFIGURATION       = 'CONFIGURATION'
@@ -170,7 +144,6 @@ class Token(object):
     # t_RPAREN  = r'\)'    
 
 
->>>>>>> 172fc58d3eb528de6034d0fd617ed60a2e844d72
 
     #def __init__(self, type, value, line, line_no, line_pos):
     def __init__(self, type, value, line_no, line_pos):        
