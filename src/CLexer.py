@@ -78,6 +78,9 @@ class CLexer:
                         self.line_pos = 0                                              
                     c = self.getchar()
 
+                token = Token(Token.COMMENT, match, self.line_no, self.line_pos)
+                self.tokens.append(token)                     
+
                 input.ii_mark_prev()
                 input.ii_mark_start() 
 
@@ -111,11 +114,6 @@ class CLexer:
                     if match == '<!-- PDIM Service URL -->':
                         pass
 
-                # start tag <abc...
-                # elif (chr(input.ii_look(1)).isalpha()):
-                #     token = Token(Token.START_TAG, c, self.line_no, self.line_pos)
-                #     self.tokens.append(token)
-
                 # end node </abc...
                 elif (chr(input.ii_look(1)) == CLexer.FORWARD_SLASH):
                     c = self.getchar()
@@ -135,7 +133,7 @@ class CLexer:
             # identifier
             elif c.isalpha(): #in string.ascii_letters:
                 match = c
-                token = Token(Token.IDENT, match, self.line_no, self.line_pos)
+                token = Token(Token.ID, match, self.line_no, self.line_pos)
                 c = self.getchar()
 
                 while c.isalnum() and not input.NO_MORE_CHARS(): #in string.ascii_letters:
@@ -197,8 +195,27 @@ class CLexer:
 
                 c = self.getchar()
                 input.ii_mark_prev()
-                input.ii_mark_start()                    
+                input.ii_mark_start()  
 
+
+            # Single Tic Quoted Identifier
+            elif c in CLexer.TIC:
+
+                match = c                                                       # begin "        
+                c = self.getchar()            
+                while c not in  CLexer.TIC and not self.input.NO_MORE_CHARS():                                           # quoted literal 
+                    match += c                                
+                    c = self.getchar()
+                match += c                                                      # end "
+
+                token = Token(Token.QUOTEDIDENT, match, self.line_no, self.line_pos)
+                self.tokens.append(token) 
+
+                c = self.getchar()
+                input.ii_mark_prev()
+                input.ii_mark_start()
+
+    
             # operators +=*/
             elif c in CLexer.OPERATORS:
                 match = c
