@@ -142,7 +142,7 @@ class Token(object):
     # t_RPAREN  = r'\)'    
 
 
-
+    # this def with lexer.py
     #def __init__(self, type, value, line, line_no, line_pos):
     def __init__(self, type, value, line_no, line_pos):        
         self.type = type

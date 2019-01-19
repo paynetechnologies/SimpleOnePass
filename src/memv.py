@@ -2,7 +2,6 @@
 import time
 import random
 import array
-
 '''
 for n in (100000, 200000, 300000, 400000):
     data = 'x'*n

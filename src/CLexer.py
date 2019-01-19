@@ -1,5 +1,6 @@
 import string
 import sys
+from src.symbol_table import SymbolTable
 
 from src.CInput import CInput
 from src.token import Token
@@ -49,6 +50,17 @@ class CLexer:
         c = self.input.ii_advance(0)
         self.line_pos += 1
         return (chr(c))
+
+    def add_to_symbol_table(self, lexeme):
+        # Symbol Table Lookup and Insert
+        symtbl_index = None
+        symtbl_index = SymbolTable.lookup(lexeme)
+
+        if (symtbl_index == None):
+            symtbl_index = SymbolTable.add(Token.ID, lexeme)
+
+        Token.token_value = symtbl_index #token value is the index into the symbol table via emitter
+        return SymbolTable.symbol_table[symtbl_index].token
 
     def tokenizer(self, input):
 
@@ -145,6 +157,8 @@ class CLexer:
 
                 token.value = match
                 self.tokens.append(token)
+
+                var_return_value = self.add_to_symbol_table(match)
 
                 input.ii_mark_prev()
                 input.ii_mark_start()                 

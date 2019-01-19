@@ -594,7 +594,6 @@ class CInput:
             
         return( self.Next > self.sMark )    
 
-
     #---------------------------------------------------
     #                      Terminate Unterminate
     # These routines are not-strictly speaking-necessary, because the lexeme 

@@ -40,9 +40,11 @@ class SymbolTable():
         
         print(f'\nSymbolTable::add_entry : Token = {entry.token} : Lexeme = {entry.lexeme}')
         
-        idx = cls.lookup(entry.lexeme)
-        if idx is not None:
-            return idx
+        # By inference, if we are here, then we already did a lookup and determined
+        # that the lexeme did not exist and thus we add the lexeme
+        # idx = cls.lookup(entry.lexeme)
+        # if idx is not None:
+        #     return idx
 
         SymbolTable.last_entry += 1
         
